@@ -1,3 +1,30 @@
+<p align="center">
+  <img
+    src="https://img.shields.io/badge/Status-Em%20desenvolvimento-green?style=flat-square"
+    alt="Status"
+  />
+</p>
+
+<p align="center">
+  <img
+    src="https://img.shields.io/github/repo-size/Caldas42/Locked-In?style=flat"
+    alt="Repository Size"
+  />
+  <img
+    src="https://img.shields.io/github/languages/count/Caldas42/Locked-In?style=flat&logo=python"
+    alt="Language Count"
+  />
+  <img
+    src="https://img.shields.io/github/commit-activity/t/Caldas42/Locked-In?style=flat&logo=github"
+    alt="Commit Activity"
+  />
+  <a href="LICENSE.md"
+    ><img
+      src="https://img.shields.io/github/license/Caldas42/Locked-In"
+      alt="License"
+  /></a>
+</p>
+
 ## 🖥️ Locked-In
 
 ## 📄 Descrição
