@@ -59,6 +59,3 @@ Para executar o Locked-In, siga estas etapas:
 * Célio Pereira Dias Júnior
 * João Danilo Correia Jota
 * Pedro da Costa Carvalho Caldas
-
-## Licença
-
