@@ -33,18 +33,20 @@ Locked In é um jogo top down em linha de comando onde o jogador acorda preso em
 
 ## 🎲 Objetivo do Jogo
 
-
+O jogador interage com o ambiente através de comandos de texto, examinando objetos e resolvendo enigmas. Ele pode utilizar alavancas, caixas e notas para obter pistas que o ajudarão a avançar. A progressão acontece ao resolver desafios em cada sala, coletar chaves e desbloquear novas áreas. O jogo oferece múltiplos finais, incentivando a exploração e a tentativa de diferentes abordagens para descobrir segredos e combinações.
 
 ## 🕹️ Como Jogar
 
-
+- 
+- 
+- 
 
 ## ♟️ Executando o Jogo
 
 Para executar o Locked-In, siga estas etapas:
 
 1. Clone este repositório em sua máquina:
-   `Lorem Ipsum has been the industry's standard`
+   `git clone https://github.com/Caldas42/Locked-In.git`
 
 3. Compile o programa:
    `Lorem Ipsum has been the industry's standard`
