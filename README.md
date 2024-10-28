@@ -58,6 +58,6 @@ Para executar o Locked-In, siga estas etapas:
 
 ## 👩‍💻 Membros
 
-* Célio Pereira Dias Júnior
-* João Danilo Correia Jota
-* Pedro da Costa Carvalho Caldas
+* Célio Pereira Dias Júnior - cpdj@cesar.school 📩
+* João Danilo Correia Jota - jdcj@cesar.school 📩
+* Pedro da Costa Carvalho Caldas - pccc@cesar.school 📩
