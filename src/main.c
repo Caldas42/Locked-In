@@ -70,9 +70,9 @@ void movePlayer(char direction) {
     clearPlayer();
     switch (direction) {
         case 'w': if (playerY > MINY + 1) playerY--; break;
-        case 's': if (playerY < MAXY - 3) playerY++; break;
+        case 's': if (playerY < MAXY - 1) playerY++; break;
         case 'a': if (playerX > MINX + 1) playerX--; break;
-        case 'd': if (playerX < MAXX - 3) playerX++; break;
+        case 'd': if (playerX < MAXX - 2) playerX++; break;
     }
     drawPlayer();
 }
