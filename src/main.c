@@ -25,75 +25,13 @@ char (*currentMaze)[MAZE_WIDTH + 2];
 int countdownTime = 3 * 60 * 1000; // 3 minutos em milissegundos
 int foundDoor = 0; // Indica se a porta foi encontrada
 
-void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
-void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void movePlayer(char direction);
 void drawPlayer();
 void clearPlayer();
-void displayCountdown(); // Função para exibir a contagem regressiva
-void endGame(); // Função para encerrar o jogo
-
-void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
-    // Preenche as bordas com paredes
-    for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-        maze[0][x] = '-'; // Bordas superiores
-        maze[MAZE_HEIGHT + 1][x] = '-'; // Bordas inferiores
-    }
-    for (int y = 1; y <= MAZE_HEIGHT; y++) {
-        maze[y][0] = '|'; // Bordas esquerdas
-        maze[y][MAZE_WIDTH + 1] = '|'; // Bordas direitas
-    }
-
-    // Gerar um labirinto aleatório simples
-    for (int y = 1; y <= MAZE_HEIGHT; y++) {
-        for (int x = 1; x <= MAZE_WIDTH; x++) {
-            // Define paredes e caminhos
-            if (rand() % 5 == 0) {
-                maze[y][x] = '|'; // Paredes verticais
-            } else {
-                maze[y][x] = ' '; // Caminhos
-            }
-        }
-    }
-
-    // Adicionando o símbolo '%' como a porta para o segundo labirinto
-    int doorX, doorY;
-    do {
-        doorX = rand() % MAZE_WIDTH + 1; // Para garantir que fique dentro dos limites
-        doorY = rand() % MAZE_HEIGHT + 1; // Para garantir que fique dentro dos limites
-    } while (maze[doorY][doorX] != ' '); // Garante que a porta seja colocada em um espaço vazio
-
-    maze[doorY][doorX] = '%'; // Colocando a porta em uma posição aleatória
-    maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0'; // Finalizando a string
-}
-
-void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
-    for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
-        for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-            screenSetColor(YELLOW, BLACK);
-            screenGotoxy(x + 1, y + 1); // Ajustando para não "comer" as bordas
-            printf("%c", maze[y][x]);
-        }
-    }
-    screenUpdate();
-}
-
-void displayCountdown() {
-    if (countdownTime <= 0) return; // Não exibe se o tempo já esgotou
-    int minutes = (countdownTime / 1000) / 60; // Convertendo para minutos
-    int seconds = (countdownTime / 1000) % 60; // Convertendo para segundos
-
-    // Exibe a contagem regressiva na parte superior da tela
-    screenGotoxy(1, 1);
-    printf("Tempo restante: %02d:%02d", minutes, seconds);
-    screenUpdate();
-}
-
-void endGame() {
-    screenGotoxy(1, MAXY + 2); // Posição para exibir a mensagem
-    printf("Tempo esgotado! Jogo encerrado.\n");
-    screenUpdate();
-}
+void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
+void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
+void displayCountdown();
+void endGame();
 
 int main() {
     // Inicializando componentes
@@ -202,4 +140,66 @@ void movePlayer(char direction) {
     }
 
     drawPlayer();
+}
+
+void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
+    // Preenche as bordas com paredes
+    for (int x = 0; x < MAZE_WIDTH + 2; x++) {
+        maze[0][x] = '-'; // Bordas superiores
+        maze[MAZE_HEIGHT + 1][x] = '-'; // Bordas inferiores
+    }
+    for (int y = 1; y <= MAZE_HEIGHT; y++) {
+        maze[y][0] = '|'; // Bordas esquerdas
+        maze[y][MAZE_WIDTH + 1] = '|'; // Bordas direitas
+    }
+
+    // Gerar um labirinto aleatório simples
+    for (int y = 1; y <= MAZE_HEIGHT; y++) {
+        for (int x = 1; x <= MAZE_WIDTH; x++) {
+            // Define paredes e caminhos
+            if (rand() % 5 == 0) {
+                maze[y][x] = '|'; // Paredes verticais
+            } else {
+                maze[y][x] = ' '; // Caminhos
+            }
+        }
+    }
+
+    // Adicionando o símbolo '%' como a porta para o segundo labirinto
+    int doorX, doorY;
+    do {
+        doorX = rand() % MAZE_WIDTH + 1; // Para garantir que fique dentro dos limites
+        doorY = rand() % MAZE_HEIGHT + 1; // Para garantir que fique dentro dos limites
+    } while (maze[doorY][doorX] != ' '); // Garante que a porta seja colocada em um espaço vazio
+
+    maze[doorY][doorX] = '%'; // Colocando a porta em uma posição aleatória
+    maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0'; // Finalizando a string
+}
+
+void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
+    for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
+        for (int x = 0; x < MAZE_WIDTH + 2; x++) {
+            screenSetColor(YELLOW, BLACK);
+            screenGotoxy(x + 1, y + 1); // Ajustando para não "comer" as bordas
+            printf("%c", maze[y][x]);
+        }
+    }
+    screenUpdate();
+}
+
+void displayCountdown() {
+    if (countdownTime <= 0) return; // Não exibe se o tempo já esgotou
+    int minutes = (countdownTime / 1000) / 60; // Convertendo para minutos
+    int seconds = (countdownTime / 1000) % 60; // Convertendo para segundos
+
+    // Exibe a contagem regressiva na parte superior da tela
+    screenGotoxy(1, 1);
+    printf("Tempo restante: %02d:%02d", minutes, seconds);
+    screenUpdate();
+}
+
+void endGame() {
+    screenGotoxy(1, MAXY + 2); // Posição para exibir a mensagem
+    printf("Tempo esgotado! Jogo encerrado.\n");
+    screenUpdate();
 }
