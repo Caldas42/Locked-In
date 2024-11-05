@@ -34,7 +34,7 @@ void generateMaze(char maze[MAZE_HEIGHT][MAZE_WIDTH + 1]) {
         for (int x = 0; x < MAZE_WIDTH; x++) {
             // Define paredes e caminhos
             if (rand() % 5 == 0) {
-                maze[y][x] = '#'; // Paredes
+                maze[y][x] = '='; // Paredes
             } else {
                 maze[y][x] = ' '; // Caminhos
             }
@@ -42,7 +42,13 @@ void generateMaze(char maze[MAZE_HEIGHT][MAZE_WIDTH + 1]) {
     }
 
     // Adicionando o símbolo '%' como a porta para o segundo labirinto
-    maze[MAZE_HEIGHT / 2][MAZE_WIDTH / 2] = '%'; // Colocando a porta no meio
+    int doorX, doorY;
+    do {
+        doorX = rand() % MAZE_WIDTH;
+        doorY = rand() % MAZE_HEIGHT;
+    } while (maze[doorY][doorX] != ' '); // Garante que a porta seja colocada em um espaço vazio
+
+    maze[doorY][doorX] = '%'; // Colocando a porta em uma posição aleatória
     maze[MAZE_HEIGHT][MAZE_WIDTH] = '\0'; // Finalizando a string
 }
 
@@ -61,7 +67,8 @@ int main() {
     keyboardInit();
     screenInit(1);
     timerInit(100);
-    
+    srand(time(NULL)); // Inicializa o gerador de números aleatórios
+
     // Gerando o labirinto
     generateMaze(maze);
     drawMaze(maze);
@@ -82,7 +89,7 @@ int main() {
             } else {
                 movePlayer(key);
                 // Verifica se o jogador atingiu o símbolo '%'
-                if (currentMaze[playerY - 1][playerX - 1] == '%') {
+                if (currentMaze[playerY][playerX] == '%') {
                     // Muda para o segundo labirinto
                     printf("Você entrou em um novo labirinto!\n");
                     generateMaze(maze2); // Gera um novo labirinto
@@ -104,13 +111,13 @@ int main() {
 }
 
 void drawPlayer() {
-    screenGotoxy(playerX, playerY);
+    screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
     printf("%c", PLAYER);
     screenUpdate();
 }
 
 void clearPlayer() {
-    screenGotoxy(playerX, playerY);
+    screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
     printf(" ");
     screenUpdate();
 }
@@ -128,8 +135,8 @@ void movePlayer(char direction) {
     }
 
     // Ajuste para a verificação de colisão no labirinto atual
-    if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY - 1][newX - 1] != '#') {
+    if (newX >= 0 && newX < MAZE_WIDTH && newY >= 0 && newY < MAZE_HEIGHT) {
+        if (currentMaze[newY][newX] != '=') {
             // Movimento válido
             playerX = newX;
             playerY = newY;
