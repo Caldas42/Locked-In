@@ -11,7 +11,7 @@
 #include "timer.h"
 
 // Definição do personagem
-#define PLAYER "@"
+#define PLAYER '@'
 #define INITIAL_X 40
 #define INITIAL_Y 12
 
@@ -19,18 +19,8 @@
 int playerX = INITIAL_X;
 int playerY = INITIAL_Y;
 
-void drawPlayer() {
-    screenGotoxy(playerX, playerY);
-    printf("%c", PLAYER);
-    screenUpdate();
-}
-
-void clearPlayer() {
-    screenGotoxy(playerX, playerY);
-    printf(" ");
-    screenUpdate();
-}
-
+void drawPlayer();
+void clearPlayer();
 void movePlayer(char direction);
 
 int main() {
@@ -62,6 +52,18 @@ int main() {
     screenDestroy();
     timerDestroy();
     return 0;
+}
+
+void drawPlayer() {
+    screenGotoxy(playerX, playerY);
+    printf("%c", PLAYER);
+    screenUpdate();
+}
+
+void clearPlayer() {
+    screenGotoxy(playerX, playerY);
+    printf(" ");
+    screenUpdate();
 }
 
 void movePlayer(char direction) {
