@@ -65,6 +65,7 @@ void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
         for (int x = 0; x < MAZE_WIDTH + 2; x++) {
+            screenSetColor(YELLOW,BLACK);
             screenGotoxy(x + 1, y + 1); // Ajustando para não "comer" as bordas
             printf("%c", maze[y][x]);
         }
@@ -121,6 +122,7 @@ int main() {
 }
 
 void drawPlayer() {
+    screenSetColor(WHITE,DARKGRAY);
     screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
     printf("%c", PLAYER);
     screenUpdate();
