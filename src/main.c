@@ -31,16 +31,7 @@ void clearPlayer() {
     screenUpdate();
 }
 
-void movePlayer(char direction) {
-    clearPlayer();
-    switch (direction) {
-        case 'w': if (playerY > MINY + 1) playerY--; break;
-        case 's': if (playerY < MAXY - 1) playerY++; break;
-        case 'a': if (playerX > MINX + 1) playerX--; break;
-        case 'd': if (playerX < MAXX - 1) playerX++; break;
-    }
-    drawPlayer();
-}
+void movePlayer(char direction);
 
 int main() {
     // Inicializando componentes
@@ -71,4 +62,15 @@ int main() {
     screenDestroy();
     timerDestroy();
     return 0;
+}
+
+void movePlayer(char direction) {
+    clearPlayer();
+    switch (direction) {
+        case 'w': if (playerY > MINY + 1) playerY--; break;
+        case 's': if (playerY < MAXY - 1) playerY++; break;
+        case 'a': if (playerX > MINX + 1) playerX--; break;
+        case 'd': if (playerX < MAXX - 1) playerX++; break;
+    }
+    drawPlayer();
 }
