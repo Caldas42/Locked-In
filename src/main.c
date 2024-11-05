@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "keyboard.h"
 #include "screen.h"
 #include "timer.h"
@@ -22,11 +21,17 @@ int playerY = INITIAL_Y;
 // Ponteiro para o labirinto atual
 char (*currentMaze)[MAZE_WIDTH + 2];
 
+// Variáveis para a contagem regressiva
+int countdownTime = 3 * 60 * 1000; // 3 minutos em milissegundos
+int foundDoor = 0; // Indica se a porta foi encontrada
+
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void movePlayer(char direction);
 void drawPlayer();
 void clearPlayer();
+void displayCountdown(); // Função para exibir a contagem regressiva
+void endGame(); // Função para encerrar o jogo
 
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     // Preenche as bordas com paredes
@@ -65,7 +70,7 @@ void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
         for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-            screenSetColor(YELLOW,BLACK);
+            screenSetColor(YELLOW, BLACK);
             screenGotoxy(x + 1, y + 1); // Ajustando para não "comer" as bordas
             printf("%c", maze[y][x]);
         }
@@ -73,12 +78,29 @@ void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     screenUpdate();
 }
 
+void displayCountdown() {
+    if (countdownTime <= 0) return; // Não exibe se o tempo já esgotou
+    int minutes = (countdownTime / 1000) / 60; // Convertendo para minutos
+    int seconds = (countdownTime / 1000) % 60; // Convertendo para segundos
+
+    // Exibe a contagem regressiva na parte superior da tela
+    screenGotoxy(1, 1);
+    printf("Tempo restante: %02d:%02d", minutes, seconds);
+    screenUpdate();
+}
+
+void endGame() {
+    screenGotoxy(1, MAXY + 2); // Posição para exibir a mensagem
+    printf("Tempo esgotado! Jogo encerrado.\n");
+    screenUpdate();
+}
+
 int main() {
     // Inicializando componentes
     keyboardInit();
     screenInit(1);
-    timerInit(100);
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
+    timerInit(100); // Inicializa o timer com um intervalo de 100ms
+    srand(0); // Inicializa o gerador de números aleatórios com uma semente fixa
 
     // Gerando o labirinto
     generateMaze(maze);
@@ -88,11 +110,24 @@ int main() {
     // Define o labirinto inicial
     currentMaze = maze;
 
+    // Inicializa a contagem regressiva
+    timerUpdateTimer(countdownTime); // Define o tempo de contagem regressiva
+
     char key;
     int running = 1;
 
     // Loop principal
     while (running) {
+        // Verifica se o tempo já acabou
+        if (timerTimeOver()) {
+            countdownTime -= 100; // Reduz a contagem em 100ms
+            if (countdownTime <= 0) {
+                endGame(); // Se o tempo se esgotar, encerra o jogo
+                break; // Sai do loop
+            }
+            displayCountdown(); // Atualiza a exibição da contagem regressiva
+        }
+
         if (keyhit()) {
             key = readch();
             if (key == 'q') {  // 'q' para sair do jogo
@@ -100,18 +135,29 @@ int main() {
             } else {
                 movePlayer(key);
                 // Verifica se o jogador atingiu o símbolo '%'
-                if (currentMaze[playerY][playerX] == '%') {
+                if (currentMaze[playerY][playerX] == '%' && !foundDoor) {
+                    foundDoor = 1; // Marcar que a porta foi encontrada
+                    // Mostra que a porta foi encontrada
+                    screenGotoxy(1, MAXY + 2); // Posição para mostrar que a porta foi encontrada
+                    printf("Você encontrou a porta!\n");
+                    screenUpdate();
+
                     // Muda para o segundo labirinto
-                    // printf("Você entrou em um novo labirinto!\n"); // Comentado para não mostrar a mensagem
                     generateMaze(maze2); // Gera um novo labirinto
                     drawMaze(maze2); // Desenha o novo labirinto
                     currentMaze = maze2; // Aponta para o novo labirinto
                     playerX = INITIAL_X; // Reinicia a posição do jogador
                     playerY = INITIAL_Y; // Reinicia a posição do jogador
                     drawPlayer(); // Desenha o jogador na nova posição
+
+                    // Reinicia a contagem
+                    countdownTime = 3 * 60 * 1000; // Reinicia para 3 minutos
+                    timerUpdateTimer(countdownTime); // Atualiza o timer com o novo valor
+                    foundDoor = 0; // Reseta o status da porta
                 }
             }
         }
+
     }
 
     // Finalizando o jogo
@@ -122,7 +168,7 @@ int main() {
 }
 
 void drawPlayer() {
-    screenSetColor(WHITE,DARKGRAY);
+    screenSetColor(WHITE, DARKGRAY);
     screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
     printf("%c", PLAYER);
     screenUpdate();
