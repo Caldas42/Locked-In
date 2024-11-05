@@ -1,101 +1,101 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "keyboard.h"
 #include "screen.h"
 #include "timer.h"
 
-#define PLAYER '@'
-#define INITIAL_X 40
-#define INITIAL_Y 12
+#define PLAYER1 '@'  // Jogador 1 (ijkl)
+#define PLAYER2 'O'  // Jogador 2 (WASD)
+#define INITIAL_X1 10
+#define INITIAL_Y1 10
+#define INITIAL_X2 60
+#define INITIAL_Y2 20
 
 #define MAZE_WIDTH (MAXX - 2)
 #define MAZE_HEIGHT (MAXY - 2)
 
-char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Aumenta para incluir bordas
-char maze2[MAZE_HEIGHT + 2][MAZE_WIDTH + 2];
+char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Labirinto atual
+char maze2[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Segundo labirinto
 
-// Definindo a posição do personagem
-int playerX = INITIAL_X;
-int playerY = INITIAL_Y;
+// Definindo as posições dos jogadores
+int player1X = INITIAL_X1;
+int player1Y = INITIAL_Y1;
+int player2X = INITIAL_X2; // Jogador 2 começa em uma posição diferente
+int player2Y = INITIAL_Y2;
 
 // Ponteiro para o labirinto atual
 char (*currentMaze)[MAZE_WIDTH + 2];
 
-// Variáveis para a contagem regressiva
-int countdownTime = 3 * 60 * 1000; // 3 minutos em milissegundos
-int foundDoor = 0; // Indica se a porta foi encontrada
-
-void movePlayer(char direction);
-void drawPlayer();
-void clearPlayer();
+void movePlayer1(char direction);
+void movePlayer2(char direction);
+void drawPlayers();
+void clearPlayers();
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
-void displayCountdown();
-void endGame();
+int checkCollision();
 
 int main() {
     // Inicializando componentes
     keyboardInit();
+    char chave;
+    int running = 1;
+
+    while (running) {
+        if (keyhit()) {
+            chave = readch();
+            if (chave == 32) {
+                running = 0;
+            } else {
+                printf("Bem-vindo ao jogo! Um jogador controla com WASD e o outro com IJKL.\n");
+                printf("Para começar, pressione ESPAÇO.");
+            }
+        }
+    }
+
     screenInit(1);
     timerInit(100); // Inicializa o timer com um intervalo de 100ms
-    srand(0); // Inicializa o gerador de números aleatórios com uma semente fixa
+    srand(time(NULL)); // Inicializa o gerador de números aleatórios
 
     // Gerando o labirinto
     generateMaze(maze);
     drawMaze(maze);
-    drawPlayer();
-    
+    drawPlayers();
+
     // Define o labirinto inicial
     currentMaze = maze;
 
-    // Inicializa a contagem regressiva
-    timerUpdateTimer(countdownTime); // Define o tempo de contagem regressiva
-
     char key;
-    int running = 1;
+    running = 1;
 
     // Loop principal
     while (running) {
-        // Verifica se o tempo já acabou
-        if (timerTimeOver()) {
-            countdownTime -= 100; // Reduz a contagem em 100ms
-            if (countdownTime <= 0) {
-                endGame(); // Se o tempo se esgotar, encerra o jogo
-                break; // Sai do loop
-            }
-            displayCountdown(); // Atualiza a exibição da contagem regressiva
-        }
-
         if (keyhit()) {
             key = readch();
-            if (key == 'q') {  // 'q' para sair do jogo
+            if (key == 27) {  // ESC para sair do jogo
                 running = 0;
             } else {
-                movePlayer(key);
-                // Verifica se o jogador atingiu o símbolo '%'
-                if (currentMaze[playerY][playerX] == '%' && !foundDoor) {
-                    foundDoor = 1; // Marcar que a porta foi encontrada
-                    // Mostra que a porta foi encontrada
-                    screenGotoxy(1, MAXY + 2); // Posição para mostrar que a porta foi encontrada
-                    printf("Você encontrou a porta!\n");
-                    screenUpdate();
-
+                // Verifica se a tecla pressionada é uma das teclas de controle
+                if (key == 'w' || key == 'a' || key == 's' || key == 'd') {
+                    movePlayer2(key); // Mover jogador 2
+                } else if (key == 'i' || key == 'j' || key == 'k' || key == 'l') {
+                    movePlayer1(key); // Mover jogador 1
+                }
+                
+                // Verifica colisão entre os jogadores
+                if (checkCollision()) {
                     // Muda para o segundo labirinto
                     generateMaze(maze2); // Gera um novo labirinto
                     drawMaze(maze2); // Desenha o novo labirinto
                     currentMaze = maze2; // Aponta para o novo labirinto
-                    playerX = INITIAL_X; // Reinicia a posição do jogador
-                    playerY = INITIAL_Y; // Reinicia a posição do jogador
-                    drawPlayer(); // Desenha o jogador na nova posição
-
-                    // Reinicia a contagem
-                    countdownTime = 3 * 60 * 1000; // Reinicia para 3 minutos
-                    timerUpdateTimer(countdownTime); // Atualiza o timer com o novo valor
-                    foundDoor = 0; // Reseta o status da porta
+                    player1X = INITIAL_X1; // Reinicia a posição do jogador 1
+                    player1Y = INITIAL_Y1;
+                    player2X = INITIAL_X2; // Reinicia a posição do jogador 2
+                    player2Y = INITIAL_Y2;
+                    drawPlayers(); // Desenha os jogadores na nova posição
                 }
             }
         }
-
     }
 
     // Finalizando o jogo
@@ -105,41 +105,71 @@ int main() {
     return 0;
 }
 
-void drawPlayer() {
-    screenSetColor(WHITE, DARKGRAY);
-    screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
-    printf("%c", PLAYER);
+void drawPlayers() {
+    // Desenha o assassino em vermelho (PLAYER2) e a presa em branco (PLAYER1)
+    screenSetColor(RED, BLACK);  // Assassino
+    screenGotoxy(player2X + 1, player2Y + 1); // Ajusta para o formato de tela
+    printf("%c", PLAYER2);
+
+    screenSetColor(WHITE, DARKGRAY);  // Presa
+    screenGotoxy(player1X + 1, player1Y + 1); // Ajusta para o formato de tela
+    printf("%c", PLAYER1);
+
     screenUpdate();
 }
 
-void clearPlayer() {
-    screenGotoxy(playerX + 1, playerY + 1); // Ajusta para o formato de tela
+void clearPlayers() {
+    screenGotoxy(player1X + 1, player1Y + 1); // Ajusta para o formato de tela
+    printf(" ");
+    screenGotoxy(player2X + 1, player2Y + 1); // Ajusta para o formato de tela
     printf(" ");
     screenUpdate();
 }
 
-void movePlayer(char direction) {
-    clearPlayer();
-    int newX = playerX;
-    int newY = playerY;
+void movePlayer1(char direction) {
+    clearPlayers();
+    int newX = player1X;
+    int newY = player1Y;
 
     switch (direction) {
-        case 'w': newY--; break; // Para cima
-        case 's': newY++; break; // Para baixo
-        case 'a': newX--; break; // Para esquerda
-        case 'd': newX++; break; // Para direita
+        case 'i': newY--; break; // Para cima (I)
+        case 'k': newY++; break; // Para baixo (K)
+        case 'j': newX--; break; // Para esquerda (J)
+        case 'l': newX++; break; // Para direita (L)
     }
 
-    // Ajuste para a verificação de colisão no labirinto atual
+    // Verifica limites do labirinto
     if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY][newX] != '|') { // Verifica se não está colidindo com a parede vertical
-            // Movimento válido
-            playerX = newX;
-            playerY = newY;
+        if (currentMaze[newY][newX] != '|') { // Verifica se não está colidindo com a parede
+            player1X = newX;
+            player1Y = newY;
         }
     }
 
-    drawPlayer();
+    drawPlayers();
+}
+
+void movePlayer2(char direction) {
+    clearPlayers();
+    int newX = player2X;
+    int newY = player2Y;
+
+    switch (direction) {
+        case 'w': newY--; break; // Para cima (W)
+        case 's': newY++; break; // Para baixo (S)
+        case 'a': newX--; break; // Para esquerda (A)
+        case 'd': newX++; break; // Para direita (D)
+    }
+
+    // Verifica limites do labirinto
+    if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
+        if (currentMaze[newY][newX] != '|') { // Verifica se não está colidindo com a parede
+            player2X = newX;
+            player2Y = newY;
+        }
+    }
+
+    drawPlayers();
 }
 
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
@@ -165,14 +195,6 @@ void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
         }
     }
 
-    // Adicionando o símbolo '%' como a porta para o segundo labirinto
-    int doorX, doorY;
-    do {
-        doorX = rand() % MAZE_WIDTH + 1; // Para garantir que fique dentro dos limites
-        doorY = rand() % MAZE_HEIGHT + 1; // Para garantir que fique dentro dos limites
-    } while (maze[doorY][doorX] != ' '); // Garante que a porta seja colocada em um espaço vazio
-
-    maze[doorY][doorX] = '%'; // Colocando a porta em uma posição aleatória
     maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0'; // Finalizando a string
 }
 
@@ -187,19 +209,6 @@ void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     screenUpdate();
 }
 
-void displayCountdown() {
-    if (countdownTime <= 0) return; // Não exibe se o tempo já esgotou
-    int minutes = (countdownTime / 1000) / 60; // Convertendo para minutos
-    int seconds = (countdownTime / 1000) % 60; // Convertendo para segundos
-
-    // Exibe a contagem regressiva na parte superior da tela
-    screenGotoxy(1, 1);
-    printf("Tempo restante: %02d:%02d", minutes, seconds);
-    screenUpdate();
-}
-
-void endGame() {
-    screenGotoxy(1, MAXY + 2); // Posição para exibir a mensagem
-    printf("Tempo esgotado! Jogo encerrado.\n");
-    screenUpdate();
+int checkCollision() {
+    return (player1X == player2X && player1Y == player2Y);
 }
