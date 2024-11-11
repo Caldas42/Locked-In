@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "keyboard.h"
 #include "screen.h"
@@ -14,17 +15,21 @@
 
 #define MAZE_WIDTH (MAXX - 2)
 #define MAZE_HEIGHT (MAXY - 2)
+#define MAX_NAME_LEN 50
+#define MAX_PLAYERS 100
+
+typedef struct {
+    char name[MAX_NAME_LEN];
+    int wins;
+} PlayerRecord;
 
 char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Labirinto atual
-char maze2[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Segundo labirinto
 
-// Definindo as posições dos jogadores
 int player1X = INITIAL_X1;
 int player1Y = INITIAL_Y1;
-int player2X = INITIAL_X2; // Jogador 2 começa em uma posição diferente
+int player2X = INITIAL_X2;
 int player2Y = INITIAL_Y2;
 
-// Ponteiro para o labirinto atual
 char (*currentMaze)[MAZE_WIDTH + 2];
 
 void movePlayer1(char direction);
@@ -34,29 +39,22 @@ void clearPlayers();
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 int checkCollision();
+void updatePlayerRecord(const char *winnerName, const char *filename);
 
 int main() {
-    // Inicializando componentes
     keyboardInit();
-    char chave;
     int running = 1;
 
-    while (running) {
-        if (keyhit()) {
-            chave = readch();
-            if (chave == 32) {
-                running = 0;
-            } else {
-                printf("██░░░░░░░▄█████▄░░░▄█████░░░██░░██░░░▄█████░░░██████▄░░░░░░░░░░░░██████░░░██████▄\n");
-                printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
-                printf("██░░░░░░░██░░░██░░░██░░░░░░░█████░░░░█████░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
-                printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
-                printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
-                printf("Bem-vindo ao jogo! Um jogador controla com WASD e o outro com IJKL.\n");
-                printf("Para começar, pressione ESPAÇO.");
-            }
-        }
-    }
+    printf("██░░░░░░░▄█████▄░░░▄█████░░░██░░██░░░▄█████░░░██████▄░░░░░░░░░░░░██████░░░██████▄\n");
+    printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
+    printf("██░░░░░░░██░░░██░░░██░░░░░░░█████░░░░█████░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
+    printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
+    printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
+
+    printf("Bem-vindo ao jogo! O pega controla com WASD e o fugitivo com IJKL.\n");
+    printf("Para começar, pressione ENTER.\n");
+    getchar();  // Aguarda o jogador pressionar ENTER para exibir o texto
+
 
     screenInit(1);
     timerInit(100); // Inicializa o timer com um intervalo de 100ms
@@ -80,53 +78,98 @@ int main() {
             if (key == 27) {  // ESC para sair do jogo
                 running = 0;
             } else {
-                // Verifica se a tecla pressionada é uma das teclas de controle
                 if (key == 'w' || key == 'a' || key == 's' || key == 'd') {
                     movePlayer2(key); // Mover jogador 2
                 } else if (key == 'i' || key == 'j' || key == 'k' || key == 'l') {
                     movePlayer1(key); // Mover jogador 1
                 }
                 
-                // Verifica colisão entre os jogadores
                 if (checkCollision()) {
-                    // Muda para o segundo labirinto
-                    generateMaze(maze2); // Gera um novo labirinto
-                    drawMaze(maze2); // Desenha o novo labirinto
-                    currentMaze = maze2; // Aponta para o novo labirinto
-                    player1X = INITIAL_X1; // Reinicia a posição do jogador 1
-                    player1Y = INITIAL_Y1;
-                    player2X = INITIAL_X2; // Reinicia a posição do jogador 2
-                    player2Y = INITIAL_Y2;
-                    drawPlayers(); // Desenha os jogadores na nova posição
+
+                    char winnerName[MAX_NAME_LEN];
+                    printf("Colisão! Digite o nome do vencedor: ");
+                    fgets(winnerName, MAX_NAME_LEN, stdin);
+                    winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
+
+                    updatePlayerRecord(winnerName, "arquivo.txt");
+                    running = 0;
                 }
             }
         }
     }
 
-    // Finalizando o jogo
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
     return 0;
 }
 
+void updatePlayerRecord(const char *winnerName, const char *filename) {
+    PlayerRecord players[MAX_PLAYERS];
+    int playerCount = 0;
+    int found = 0;
+
+    // Abre o arquivo em modo de leitura para carregar dados existentes
+    FILE *file = fopen(filename, "r");
+    if (file) {
+        while (fscanf(file, "%s %d", players[playerCount].name, &players[playerCount].wins) == 2) {
+            if (strcmp(players[playerCount].name, winnerName) == 0) {
+                players[playerCount].wins++;
+                found = 1;
+            }
+            playerCount++;
+            if (playerCount >= MAX_PLAYERS) break;
+        }
+        fclose(file);
+    }
+
+    // Se o vencedor não foi encontrado, adiciona-o ao final da lista
+    if (!found && playerCount < MAX_PLAYERS) {
+        strncpy(players[playerCount].name, winnerName, MAX_NAME_LEN);
+        players[playerCount].wins = 1;
+        playerCount++;
+    }
+
+    // Abre o arquivo em modo de adição e grava apenas o novo vencedor
+    if (!found) {
+        file = fopen(filename, "a");
+        if (file) {
+            fprintf(file, "%s %d\n", winnerName, 1);
+            fclose(file);
+        } else {
+            printf("Erro ao abrir o arquivo %s para gravação.\n", filename);
+        }
+    } else {
+        // Sobrescreve o arquivo somente quando o vencedor já existe
+        file = fopen(filename, "w");
+        if (file) {
+            for (int i = 0; i < playerCount; i++) {
+                fprintf(file, "%s %d\n", players[i].name, players[i].wins);
+            }
+            fclose(file);
+        } else {
+            printf("Erro ao abrir o arquivo %s para gravação.\n", filename);
+        }
+    }
+}
+
+
 void drawPlayers() {
-    // Desenha o assassino em vermelho (PLAYER2) e a presa em branco (PLAYER1)
     screenSetColor(RED, BLACK);  // Assassino
-    screenGotoxy(player2X + 1, player2Y + 1); // Ajusta para o formato de tela
+    screenGotoxy(player2X + 1, player2Y + 1);
     printf("%c", PLAYER2);
 
     screenSetColor(WHITE, DARKGRAY);  // Presa
-    screenGotoxy(player1X + 1, player1Y + 1); // Ajusta para o formato de tela
+    screenGotoxy(player1X + 1, player1Y + 1);
     printf("%c", PLAYER1);
 
     screenUpdate();
 }
 
 void clearPlayers() {
-    screenGotoxy(player1X + 1, player1Y + 1); // Ajusta para o formato de tela
+    screenGotoxy(player1X + 1, player1Y + 1);
     printf(" ");
-    screenGotoxy(player2X + 1, player2Y + 1); // Ajusta para o formato de tela
+    screenGotoxy(player2X + 1, player2Y + 1);
     printf(" ");
     screenUpdate();
 }
@@ -137,15 +180,14 @@ void movePlayer1(char direction) {
     int newY = player1Y;
 
     switch (direction) {
-        case 'i': newY--; break; // Para cima (I)
-        case 'k': newY++; break; // Para baixo (K)
-        case 'j': newX--; break; // Para esquerda (J)
-        case 'l': newX++; break; // Para direita (L)
+        case 'i': newY--; break;
+        case 'k': newY++; break;
+        case 'j': newX--; break;
+        case 'l': newX++; break;
     }
 
-    // Verifica limites do labirinto
     if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY][newX] != '|') { // Verifica se não está colidindo com a parede
+        if (currentMaze[newY][newX] != '|') {
             player1X = newX;
             player1Y = newY;
         }
@@ -160,15 +202,14 @@ void movePlayer2(char direction) {
     int newY = player2Y;
 
     switch (direction) {
-        case 'w': newY--; break; // Para cima (W)
-        case 's': newY++; break; // Para baixo (S)
-        case 'a': newX--; break; // Para esquerda (A)
-        case 'd': newX++; break; // Para direita (D)
+        case 'w': newY--; break;
+        case 's': newY++; break;
+        case 'a': newX--; break;
+        case 'd': newX++; break;
     }
 
-    // Verifica limites do labirinto
     if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY][newX] != '|') { // Verifica se não está colidindo com a parede
+        if (currentMaze[newY][newX] != '|') {
             player2X = newX;
             player2Y = newY;
         }
@@ -178,36 +219,33 @@ void movePlayer2(char direction) {
 }
 
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
-    // Preenche as bordas com paredes
     for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-        maze[0][x] = '-'; // Bordas superiores
-        maze[MAZE_HEIGHT + 1][x] = '-'; // Bordas inferiores
+        maze[0][x] = '-';
+        maze[MAZE_HEIGHT + 1][x] = '-';
     }
     for (int y = 1; y <= MAZE_HEIGHT; y++) {
-        maze[y][0] = '|'; // Bordas esquerdas
-        maze[y][MAZE_WIDTH + 1] = '|'; // Bordas direitas
+        maze[y][0] = '|';
+        maze[y][MAZE_WIDTH + 1] = '|';
     }
 
-    // Gerar um labirinto aleatório simples
     for (int y = 1; y <= MAZE_HEIGHT; y++) {
         for (int x = 1; x <= MAZE_WIDTH; x++) {
-            // Define paredes e caminhos
             if (rand() % 5 == 0) {
-                maze[y][x] = '|'; // Paredes verticais
+                maze[y][x] = '|';
             } else {
-                maze[y][x] = ' '; // Caminhos
+                maze[y][x] = ' ';
             }
         }
     }
 
-    maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0'; // Finalizando a string
+    maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0';
 }
 
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
     for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
         for (int x = 0; x < MAZE_WIDTH + 2; x++) {
             screenSetColor(YELLOW, BLACK);
-            screenGotoxy(x + 1, y + 1); // Ajustando para não "comer" as bordas
+            screenGotoxy(x + 1, y + 1);
             printf("%c", maze[y][x]);
         }
     }
