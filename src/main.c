@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "keyboard.h"
 #include "screen.h"
 #include "timer.h"
@@ -46,56 +45,64 @@ void printPlayerRecords(PlayerRecord players[], int playerCount);
 
 int main() {
     keyboardInit();
-    int running = 1;
+    int starting = 1, running = 1;
+    char key;
 
     printf("██░░░░░░░▄█████▄░░░▄█████░░░██░░██░░░▄█████░░░██████▄░░░░░░░░░░░░██████░░░██████▄\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░█████░░░░█████░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
     printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
-
     printf("Bem-vindo ao jogo! O assassino controla com WASD e a vítima com IJKL.\n");
-    printf("Para começar, pressione ENTER.\n");
-    getchar();  // Aguarda o jogador pressionar ENTER para exibir o texto
+    printf("Pressione espaço para começar!\n");
 
-    screenInit(1);
-    timerInit(100); // Inicializa o timer com um intervalo de 100ms
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
-
-    // Gerando o labirinto
-    generateMaze(maze);
-    drawMaze(maze);
-    drawPlayers();
-
-    // Define o labirinto inicial
-    currentMaze = maze;
-
-    char key;
-    running = 1;
-
-    // Loop principal
-    while (running) {
-        if (keyhit()) {
+    while(starting) {
+        if(keyhit()) {
             key = readch();
-            if (key == 27) {  // ESC para sair do jogo
-                running = 0;
-            } else {
-                if (key == 'w' || key == 'a' || key == 's' || key == 'd') {
-                    movePlayer2(key); // Mover jogador 2
-                } else if (key == 'i' || key == 'j' || key == 'k' || key == 'l') {
-                    movePlayer1(key); // Mover jogador 1
-                }
-                
-                if (checkCollision()) {
-                    char winnerName[MAX_NAME_LEN];
-                    screenClear();
-                    printf("Colisão! Digite o nome do vencedor: ");
-                    fgets(winnerName, MAX_NAME_LEN, stdin);
-                    winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
 
-                    updatePlayerRecord(winnerName, "arquivo.txt");
-                    running = 0;
+            if(key == 32) {
+                screenInit(1);
+                timerInit(100); // Inicializa o timer com um intervalo de 100ms
+                srand(time(NULL)); // Inicializa o gerador de números aleatórios
+
+                // Gerando o labirinto
+                generateMaze(maze);
+                drawMaze(maze);
+                drawPlayers();
+
+                // Define o labirinto inicial
+                currentMaze = maze;
+                
+                while(running) {
+                    if(keyhit()) {
+                        key = readch();
+
+                        if(key == 27) {
+                            running = 0;
+                            starting = 0;
+                        } else {
+                            if(key == 'w' || key == 'a' || key == 's' || key == 'd') {
+                                movePlayer2(key);
+                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l') {
+                                movePlayer1(key);
+                            }
+                            
+                            if(checkCollision()) {
+                                char winnerName[MAX_NAME_LEN];
+                                screenClear();
+                                printf("Colisão! Digite o nome do vencedor: ");
+                                fgets(winnerName, MAX_NAME_LEN, stdin);
+                                winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
+
+                                updatePlayerRecord(winnerName, "arquivo.txt");
+                                running = 0;
+                                starting = 0;
+                            }
+                        }
+                    }
                 }
+            } else if(key == 27) {
+                starting = 0;
             }
         }
     }
