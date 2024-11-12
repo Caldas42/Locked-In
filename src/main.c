@@ -6,8 +6,8 @@
 #include "screen.h"
 #include "timer.h"
 
-#define PLAYER1 '@'  // Jogador 1 (ijkl)
-#define PLAYER2 'O'  // Jogador 2 (WASD)
+#define PLAYER1 'V'  // Jogador 1 (ijkl)
+#define PLAYER2 'A'  // Jogador 2 (WASD)
 #define INITIAL_X1 10
 #define INITIAL_Y1 10
 #define INITIAL_X2 60
@@ -54,7 +54,7 @@ int main() {
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
     printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
 
-    printf("Bem-vindo ao jogo! O pega controla com WASD e o fugitivo com IJKL.\n");
+    printf("Bem-vindo ao jogo! O assassino controla com WASD e a vítima com IJKL.\n");
     printf("Para começar, pressione ENTER.\n");
     getchar();  // Aguarda o jogador pressionar ENTER para exibir o texto
 
