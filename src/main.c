@@ -88,6 +88,7 @@ int main() {
                 
                 if (checkCollision()) {
                     char winnerName[MAX_NAME_LEN];
+                    screenClear();
                     printf("Colisão! Digite o nome do vencedor: ");
                     fgets(winnerName, MAX_NAME_LEN, stdin);
                     winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
@@ -190,7 +191,7 @@ void sortPlayersByWins(PlayerRecord players[], int playerCount) {
 }
 
 void printPlayerRecords(PlayerRecord players[], int playerCount) {
-    printf("\t\t\t\nRanking de Vencedores:\n");
+    printf("\n\t\t\tRanking de Vencedores:\n");
     
     for (int i = 0; i < playerCount; i++) {
         printf("\t\t\t%s: %d vitórias\n", players[i].name, players[i].wins);
