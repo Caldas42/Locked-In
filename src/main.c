@@ -40,6 +40,9 @@ void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 int checkCollision();
 void updatePlayerRecord(const char *winnerName, const char *filename);
+void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
+void sortPlayersByWins(PlayerRecord players[], int playerCount);
+void printPlayerRecords(PlayerRecord players[], int playerCount);
 
 int main() {
     keyboardInit();
@@ -54,7 +57,6 @@ int main() {
     printf("Bem-vindo ao jogo! O pega controla com WASD e o fugitivo com IJKL.\n");
     printf("Para começar, pressione ENTER.\n");
     getchar();  // Aguarda o jogador pressionar ENTER para exibir o texto
-
 
     screenInit(1);
     timerInit(100); // Inicializa o timer com um intervalo de 100ms
@@ -85,7 +87,6 @@ int main() {
                 }
                 
                 if (checkCollision()) {
-
                     char winnerName[MAX_NAME_LEN];
                     printf("Colisão! Digite o nome do vencedor: ");
                     fgets(winnerName, MAX_NAME_LEN, stdin);
@@ -101,6 +102,14 @@ int main() {
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
+
+    // Exibir o ranking dos vencedores
+    PlayerRecord players[MAX_PLAYERS];
+    int playerCount = 0;
+    loadPlayerRecords("arquivo.txt", players, &playerCount);
+    sortPlayersByWins(players, playerCount);
+    printPlayerRecords(players, playerCount);
+
     return 0;
 }
 
@@ -153,6 +162,40 @@ void updatePlayerRecord(const char *winnerName, const char *filename) {
     }
 }
 
+void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount) {
+    *playerCount = 0;
+    FILE *file = fopen(filename, "r");
+    
+    if (file) {
+        while (fscanf(file, "%s %d", players[*playerCount].name, &players[*playerCount].wins) == 2) {
+            (*playerCount)++;
+            if (*playerCount >= MAX_PLAYERS) break;
+        }
+        fclose(file);
+    } else {
+        printf("Erro ao abrir o arquivo %s.\n", filename);
+    }
+}
+
+void sortPlayersByWins(PlayerRecord players[], int playerCount) {
+    for (int i = 0; i < playerCount - 1; i++) {
+        for (int j = i + 1; j < playerCount; j++) {
+            if (players[i].wins < players[j].wins) {
+                PlayerRecord temp = players[i];
+                players[i] = players[j];
+                players[j] = temp;
+            }
+        }
+    }
+}
+
+void printPlayerRecords(PlayerRecord players[], int playerCount) {
+    printf("\t\t\t\nRanking de Vencedores:\n");
+    
+    for (int i = 0; i < playerCount; i++) {
+        printf("\t\t\t%s: %d vitórias\n", players[i].name, players[i].wins);
+    }
+}
 
 void drawPlayers() {
     screenSetColor(RED, BLACK);  // Assassino
@@ -176,8 +219,7 @@ void clearPlayers() {
 
 void movePlayer1(char direction) {
     clearPlayers();
-    int newX = player1X;
-    int newY = player1Y;
+    int newX = player1X, newY = player1Y;
 
     switch (direction) {
         case 'i': newY--; break;
@@ -186,11 +228,9 @@ void movePlayer1(char direction) {
         case 'l': newX++; break;
     }
 
-    if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY][newX] != '|') {
-            player1X = newX;
-            player1Y = newY;
-        }
+    if (currentMaze[newY][newX] == ' ') {
+        player1X = newX;
+        player1Y = newY;
     }
 
     drawPlayers();
@@ -198,8 +238,7 @@ void movePlayer1(char direction) {
 
 void movePlayer2(char direction) {
     clearPlayers();
-    int newX = player2X;
-    int newY = player2Y;
+    int newX = player2X, newY = player2Y;
 
     switch (direction) {
         case 'w': newY--; break;
@@ -208,14 +247,16 @@ void movePlayer2(char direction) {
         case 'd': newX++; break;
     }
 
-    if (newX >= 1 && newX <= MAZE_WIDTH && newY >= 1 && newY <= MAZE_HEIGHT) {
-        if (currentMaze[newY][newX] != '|') {
-            player2X = newX;
-            player2Y = newY;
-        }
+    if (currentMaze[newY][newX] == ' ') {
+        player2X = newX;
+        player2Y = newY;
     }
 
     drawPlayers();
+}
+
+int checkCollision() {
+    return player1X == player2X && player1Y == player2Y;
 }
 
 void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
@@ -242,16 +283,12 @@ void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
 }
 
 void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
+    screenSetColor(WHITE, BLACK);
     for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
         for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-            screenSetColor(YELLOW, BLACK);
             screenGotoxy(x + 1, y + 1);
             printf("%c", maze[y][x]);
         }
     }
     screenUpdate();
-}
-
-int checkCollision() {
-    return (player1X == player2X && player1Y == player2Y);
 }
