@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "keyboard.h"
 #include "screen.h"
 #include "timer.h"
