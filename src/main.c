@@ -35,8 +35,8 @@ void printarJogadores();
 void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+int assassinato();
 
-int checkCollision();
 void updatePlayerRecord(const char *winnerName, const char *filename);
 void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
 void sortPlayersByWins(PlayerRecord players[], int playerCount);
@@ -80,14 +80,15 @@ int main() {
                                 movimentarJogador2(key, labirinto);
                             }
                             
-                            if(checkCollision()) {
-                                char winnerName[MAX_NAME_LEN];
+                            if(assassinato()) {
                                 screenClear();
-                                printf("Colisão! Digite o nome do vencedor: ");
+                                printf("O Assassino venceu! Digite seu nome: ");
+
+                                char winnerName[MAX_NAME_LEN];
                                 fgets(winnerName, MAX_NAME_LEN, stdin);
                                 winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
-
                                 updatePlayerRecord(winnerName, "arquivo.txt");
+
                                 running = 0;
                                 menu = 0;
                             }
@@ -248,6 +249,10 @@ void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
     printarJogadores();
 }
 
+int assassinato() {
+    return jogador1X == jogador2X && jogador1Y == jogador2Y;
+}
+
 void updatePlayerRecord(const char *winnerName, const char *filename) {
     PlayerRecord players[MAX_PLAYERS];
     int playerCount = 0;
@@ -330,8 +335,4 @@ void printPlayerRecords(PlayerRecord players[], int playerCount) {
     for (int i = 0; i < playerCount; i++) {
         printf("\t\t\t%s: %d vitórias\n", players[i].name, players[i].wins);
     }
-}
-
-int checkCollision() {
-    return jogador1X == jogador2X && jogador1Y == jogador2Y;
 }
