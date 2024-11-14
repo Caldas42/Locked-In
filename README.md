@@ -49,10 +49,10 @@ Para executar o Locked-In, siga estas etapas:
    `git clone https://github.com/Caldas42/Locked-In.git`
 
 3. Compile o programa:
-   `Lorem Ipsum has been the industry's standard`
+   `gcc ./src/*.c -I./include -o Locked-In`
 
 4. Rode o programa:
-   `Lorem Ipsum has been the industry's standardn`
+   `./Locked-In`
 
 5. Divirta-se jogando Locked-In!
 
