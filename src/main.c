@@ -6,15 +6,20 @@
 #include "screen.h"
 #include "timer.h"
 
-#define comprimentoLabirinto (MAXX - 2)
-#define larguraLabirinto (MAXY - 2)
+#define COMPRIMENTO_LABIRINTO (MAXX - 2)
+#define LARGURA_LABIRINTO (MAXY - 2)
 
-#define PLAYER1 'V'  // Jogador 1 (ijkl)
-#define PLAYER2 'A'  // Jogador 2 (WASD)
-#define INITIAL_X1 10
-#define INITIAL_Y1 10
-#define INITIAL_X2 60
-#define INITIAL_Y2 20
+#define JOGADOR1 '0'
+#define JOGADOR2 'A'
+#define X1_INICIAL 10
+#define Y1_INICIAL 10
+#define X2_INICIAL 60
+#define Y2_INICIAL 20
+
+int jogador1X = X1_INICIAL;
+int jogador1Y = Y1_INICIAL;
+int jogador2X = X2_INICIAL;
+int jogador2Y = Y2_INICIAL;
 
 #define MAX_NAME_LEN 50
 #define MAX_PLAYERS 100
@@ -24,19 +29,14 @@ typedef struct {
     int wins;
 } PlayerRecord;
 
-int player1X = INITIAL_X1;
-int player1Y = INITIAL_Y1;
-int player2X = INITIAL_X2;
-int player2Y = INITIAL_Y2;
+char (*currentMaze)[COMPRIMENTO_LABIRINTO + 2];
 
-char (*currentMaze)[comprimentoLabirinto + 2];
-
-void gerarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]);
-void printarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]);
+void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void printarJogadores();
 
 void movePlayer1(char direction);
 void movePlayer2(char direction);
-void drawPlayers();
 void clearPlayers();
 int checkCollision();
 void updatePlayerRecord(const char *winnerName, const char *filename);
@@ -47,7 +47,7 @@ void printPlayerRecords(PlayerRecord players[], int playerCount);
 int main() {
     keyboardInit();
     int menu = 1, running = 1;
-    char key, labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2];
+    char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2];
     srand(time(NULL));
     gerarLabirinto(labirinto);
 
@@ -66,7 +66,7 @@ int main() {
             if(key == 32) {
                 screenInit(1);
                 printarLabirinto(labirinto);
-                drawPlayers();
+                printarJogadores();
 
                 // Define o labirinto inicial
                 currentMaze = labirinto;
@@ -118,19 +118,19 @@ int main() {
     return 0;
 }
 
-void gerarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]) {
-    for(int i = 0; i < comprimentoLabirinto + 2; i++) {
+void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+    for(int i = 0; i < COMPRIMENTO_LABIRINTO + 2; i++) {
         labirinto[0][i] = '-';
-        labirinto[larguraLabirinto + 1][i] = '-';
+        labirinto[LARGURA_LABIRINTO + 1][i] = '-';
     }
 
-    for(int i = 1; i <= larguraLabirinto; i++) {
+    for(int i = 1; i <= LARGURA_LABIRINTO; i++) {
         labirinto[i][0] = '|';
-        labirinto[i][comprimentoLabirinto + 1] = '|';
+        labirinto[i][COMPRIMENTO_LABIRINTO + 1] = '|';
     }
 
-    for(int i = 1; i <= larguraLabirinto; i++) {
-        for(int j = 1; j <= comprimentoLabirinto; j++) {
+    for(int i = 1; i <= LARGURA_LABIRINTO; i++) {
+        for(int j = 1; j <= COMPRIMENTO_LABIRINTO; j++) {
             if(rand() % 5 == 0) {
                 labirinto[i][j] = '|';
             } else {
@@ -140,15 +140,27 @@ void gerarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 
     }
 }
 
-void printarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]) {
+void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
     screenSetColor(WHITE, BLACK);
 
-    for(int i = 0; i < larguraLabirinto + 2; i++) {
-        for(int j = 0; j < comprimentoLabirinto + 2; j++) {
+    for(int i = 0; i < LARGURA_LABIRINTO + 2; i++) {
+        for(int j = 0; j < COMPRIMENTO_LABIRINTO + 2; j++) {
             screenGotoxy(j + 1, i + 1);
             printf("%c", labirinto[i][j]);
         }
     }
+
+    screenUpdate();
+}
+
+void printarJogadores() {
+    screenSetColor(BLUE, DARKGRAY);
+    screenGotoxy(jogador1X + 1, jogador1Y + 1);
+    printf("%c", JOGADOR1);
+
+    screenSetColor(RED, BLACK);
+    screenGotoxy(jogador2X + 1, jogador2Y + 1);
+    printf("%c", JOGADOR2);
 
     screenUpdate();
 }
@@ -237,29 +249,17 @@ void printPlayerRecords(PlayerRecord players[], int playerCount) {
     }
 }
 
-void drawPlayers() {
-    screenSetColor(RED, BLACK);  // Assassino
-    screenGotoxy(player2X + 1, player2Y + 1);
-    printf("%c", PLAYER2);
-
-    screenSetColor(WHITE, DARKGRAY);  // Presa
-    screenGotoxy(player1X + 1, player1Y + 1);
-    printf("%c", PLAYER1);
-
-    screenUpdate();
-}
-
 void clearPlayers() {
-    screenGotoxy(player1X + 1, player1Y + 1);
+    screenGotoxy(jogador1X + 1, jogador1Y + 1);
     printf(" ");
-    screenGotoxy(player2X + 1, player2Y + 1);
+    screenGotoxy(jogador2X + 1, jogador2Y + 1);
     printf(" ");
     screenUpdate();
 }
 
 void movePlayer1(char direction) {
     clearPlayers();
-    int newX = player1X, newY = player1Y;
+    int newX = jogador1X, newY = jogador1Y;
 
     switch (direction) {
         case 'w': newY--; break;
@@ -269,16 +269,16 @@ void movePlayer1(char direction) {
     }
 
     if (currentMaze[newY][newX] == ' ') {
-        player1X = newX;
-        player1Y = newY;
+        jogador1X = newX;
+        jogador1Y = newY;
     }
 
-    drawPlayers();
+    printarJogadores();
 }
 
 void movePlayer2(char direction) {
     clearPlayers();
-    int newX = player2X, newY = player2Y;
+    int newX = jogador2X, newY = jogador2Y;
 
     switch (direction) {
         case 'i': newY--; break;
@@ -288,13 +288,13 @@ void movePlayer2(char direction) {
     }
 
     if (currentMaze[newY][newX] == ' ') {
-        player2X = newX;
-        player2Y = newY;
+        jogador2X = newX;
+        jogador2Y = newY;
     }
 
-    drawPlayers();
+    printarJogadores();
 }
 
 int checkCollision() {
-    return player1X == player2X && player1Y == player2Y;
+    return jogador1X == jogador2X && jogador1Y == jogador2Y;
 }
