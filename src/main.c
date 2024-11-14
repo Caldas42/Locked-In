@@ -21,7 +21,7 @@ int jogador1Y = Y1_INICIAL;
 int jogador2X = X2_INICIAL;
 int jogador2Y = Y2_INICIAL;
 
-#define TEMPO 5000
+#define TEMPO 60000
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
@@ -30,7 +30,7 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
-void rankearNome(FILE *ranking, char *nome);
+void rankear(FILE *ranking, char *nome);
 
 int main() {
     keyboardInit();
@@ -66,15 +66,15 @@ int main() {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
 
-                        ranking = fopen("ranking.txt", "a");
+                        ranking = fopen("rankingVitima.txt", "a");
+
                         if(ranking == NULL){
                             printf("Erro no ranking\n");
                             exit(1);
                         }
 
-                        nome = (char *)malloc(50*sizeof(char));
-
-                        rankearNome(ranking,nome);
+                        rankear(ranking, nome);
+                        fclose(ranking);
 
                         running = 0;
                         menu = 0;
@@ -97,6 +97,16 @@ int main() {
                                 screenClear();
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
+
+                                ranking = fopen("rankingAssassino.txt", "a");
+                        
+                                if(ranking == NULL){
+                                    printf("Erro no ranking\n");
+                                    exit(1);
+                                }
+
+                                rankear(ranking, nome);
+                                fclose(ranking);
 
                                 running = 0;
                                 menu = 0;
@@ -255,18 +265,19 @@ int assassinato() {
     return jogador1X == jogador2X && jogador1Y == jogador2Y;
 }
 
-void rankearNome(FILE *ranking, char *nome) {
-    if(ranking == NULL){
-        printf("Erro no ranking\n");
-        exit(1);
-    }
-
+void rankear(FILE *ranking, char *nome) {
     nome = (char *)malloc(50*sizeof(char));
+    int delay = 1;
 
+    timerInit(2000);
+
+    while(delay) {
+        if(timerTimeOver()) {
+            delay = 0;
+        }
+    }
+    
     printf("Digite seu nome: ");
     fgets(nome, 50, stdin);
-    
     fprintf(ranking, "%s", nome);
-
-    fclose(ranking);
 }
