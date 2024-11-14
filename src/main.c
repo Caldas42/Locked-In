@@ -6,6 +6,9 @@
 #include "screen.h"
 #include "timer.h"
 
+#define comprimentoLabirinto (MAXX - 2)
+#define larguraLabirinto (MAXY - 2)
+
 #define PLAYER1 'V'  // Jogador 1 (ijkl)
 #define PLAYER2 'A'  // Jogador 2 (WASD)
 #define INITIAL_X1 10
@@ -13,8 +16,6 @@
 #define INITIAL_X2 60
 #define INITIAL_Y2 20
 
-#define MAZE_WIDTH (MAXX - 2)
-#define MAZE_HEIGHT (MAXY - 2)
 #define MAX_NAME_LEN 50
 #define MAX_PLAYERS 100
 
@@ -23,21 +24,20 @@ typedef struct {
     int wins;
 } PlayerRecord;
 
-char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]; // Labirinto atual
-
 int player1X = INITIAL_X1;
 int player1Y = INITIAL_Y1;
 int player2X = INITIAL_X2;
 int player2Y = INITIAL_Y2;
 
-char (*currentMaze)[MAZE_WIDTH + 2];
+char (*currentMaze)[comprimentoLabirinto + 2];
+
+void gerarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]);
+void printarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]);
 
 void movePlayer1(char direction);
 void movePlayer2(char direction);
 void drawPlayers();
 void clearPlayers();
-void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
-void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]);
 int checkCollision();
 void updatePlayerRecord(const char *winnerName, const char *filename);
 void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
@@ -46,33 +46,30 @@ void printPlayerRecords(PlayerRecord players[], int playerCount);
 
 int main() {
     keyboardInit();
-    int starting = 1, running = 1;
-    char key;
+    int menu = 1, running = 1;
+    char key, labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2];
+    srand(time(NULL));
+    gerarLabirinto(labirinto);
 
     printf("██░░░░░░░▄█████▄░░░▄█████░░░██░░██░░░▄█████░░░██████▄░░░░░░░░░░░░██████░░░██████▄\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░█████░░░░█████░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
     printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
-    printf("Bem-vindo ao jogo! O assassino controla com WASD e a vítima com IJKL.\n");
-    printf("Pressione espaço para começar!\n");
+    printf("Você (WASD) acorda preso em um labirinto e o Assassino (IJKL) está em sua procura! Fuja até o tempo acabar ou seja a sua próxima vítma.\n");
+    printf("Pressione espaço para começar.\n");
 
-    while(starting) {
+    while(menu) {
         if(keyhit()) {
             key = readch();
 
             if(key == 32) {
                 screenInit(1);
-                timerInit(100); // Inicializa o timer com um intervalo de 100ms
-                srand(time(NULL)); // Inicializa o gerador de números aleatórios
-
-                // Gerando o labirinto
-                generateMaze(maze);
-                drawMaze(maze);
+                printarLabirinto(labirinto);
                 drawPlayers();
 
                 // Define o labirinto inicial
-                currentMaze = maze;
+                currentMaze = labirinto;
                 
                 while(running) {
                     if(keyhit()) {
@@ -80,12 +77,12 @@ int main() {
 
                         if(key == 27) {
                             running = 0;
-                            starting = 0;
+                            menu = 0;
                         } else {
                             if(key == 'w' || key == 'a' || key == 's' || key == 'd') {
-                                movePlayer2(key);
-                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l') {
                                 movePlayer1(key);
+                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l') {
+                                movePlayer2(key);
                             }
                             
                             if(checkCollision()) {
@@ -97,20 +94,19 @@ int main() {
 
                                 updatePlayerRecord(winnerName, "arquivo.txt");
                                 running = 0;
-                                starting = 0;
+                                menu = 0;
                             }
                         }
                     }
                 }
             } else if(key == 27) {
-                starting = 0;
+                menu = 0;
             }
         }
     }
 
     keyboardDestroy();
     screenDestroy();
-    timerDestroy();
 
     // Exibir o ranking dos vencedores
     PlayerRecord players[MAX_PLAYERS];
@@ -120,6 +116,41 @@ int main() {
     printPlayerRecords(players, playerCount);
 
     return 0;
+}
+
+void gerarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]) {
+    for(int i = 0; i < comprimentoLabirinto + 2; i++) {
+        labirinto[0][i] = '-';
+        labirinto[larguraLabirinto + 1][i] = '-';
+    }
+
+    for(int i = 1; i <= larguraLabirinto; i++) {
+        labirinto[i][0] = '|';
+        labirinto[i][comprimentoLabirinto + 1] = '|';
+    }
+
+    for(int i = 1; i <= larguraLabirinto; i++) {
+        for(int j = 1; j <= comprimentoLabirinto; j++) {
+            if(rand() % 5 == 0) {
+                labirinto[i][j] = '|';
+            } else {
+                labirinto[i][j] = ' ';
+            }
+        }
+    }
+}
+
+void printarLabirinto(char labirinto[larguraLabirinto + 2][comprimentoLabirinto + 2]) {
+    screenSetColor(WHITE, BLACK);
+
+    for(int i = 0; i < larguraLabirinto + 2; i++) {
+        for(int j = 0; j < comprimentoLabirinto + 2; j++) {
+            screenGotoxy(j + 1, i + 1);
+            printf("%c", labirinto[i][j]);
+        }
+    }
+
+    screenUpdate();
 }
 
 void updatePlayerRecord(const char *winnerName, const char *filename) {
@@ -231,10 +262,10 @@ void movePlayer1(char direction) {
     int newX = player1X, newY = player1Y;
 
     switch (direction) {
-        case 'i': newY--; break;
-        case 'k': newY++; break;
-        case 'j': newX--; break;
-        case 'l': newX++; break;
+        case 'w': newY--; break;
+        case 's': newY++; break;
+        case 'a': newX--; break;
+        case 'd': newX++; break;
     }
 
     if (currentMaze[newY][newX] == ' ') {
@@ -250,10 +281,10 @@ void movePlayer2(char direction) {
     int newX = player2X, newY = player2Y;
 
     switch (direction) {
-        case 'w': newY--; break;
-        case 's': newY++; break;
-        case 'a': newX--; break;
-        case 'd': newX++; break;
+        case 'i': newY--; break;
+        case 'k': newY++; break;
+        case 'j': newX--; break;
+        case 'l': newX++; break;
     }
 
     if (currentMaze[newY][newX] == ' ') {
@@ -266,38 +297,4 @@ void movePlayer2(char direction) {
 
 int checkCollision() {
     return player1X == player2X && player1Y == player2Y;
-}
-
-void generateMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
-    for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-        maze[0][x] = '-';
-        maze[MAZE_HEIGHT + 1][x] = '-';
-    }
-    for (int y = 1; y <= MAZE_HEIGHT; y++) {
-        maze[y][0] = '|';
-        maze[y][MAZE_WIDTH + 1] = '|';
-    }
-
-    for (int y = 1; y <= MAZE_HEIGHT; y++) {
-        for (int x = 1; x <= MAZE_WIDTH; x++) {
-            if (rand() % 5 == 0) {
-                maze[y][x] = '|';
-            } else {
-                maze[y][x] = ' ';
-            }
-        }
-    }
-
-    maze[MAZE_HEIGHT + 1][MAZE_WIDTH + 1] = '\0';
-}
-
-void drawMaze(char maze[MAZE_HEIGHT + 2][MAZE_WIDTH + 2]) {
-    screenSetColor(WHITE, BLACK);
-    for (int y = 0; y < MAZE_HEIGHT + 2; y++) {
-        for (int x = 0; x < MAZE_WIDTH + 2; x++) {
-            screenGotoxy(x + 1, y + 1);
-            printf("%c", maze[y][x]);
-        }
-    }
-    screenUpdate();
 }
