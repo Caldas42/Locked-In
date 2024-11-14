@@ -29,15 +29,13 @@ typedef struct {
     int wins;
 } PlayerRecord;
 
-char (*currentMaze)[COMPRIMENTO_LABIRINTO + 2];
-
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarJogadores();
+void limparJogadores();
+void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 
-void movePlayer1(char direction);
-void movePlayer2(char direction);
-void clearPlayers();
 int checkCollision();
 void updatePlayerRecord(const char *winnerName, const char *filename);
 void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
@@ -67,9 +65,6 @@ int main() {
                 screenInit(1);
                 printarLabirinto(labirinto);
                 printarJogadores();
-
-                // Define o labirinto inicial
-                currentMaze = labirinto;
                 
                 while(running) {
                     if(keyhit()) {
@@ -79,10 +74,10 @@ int main() {
                             running = 0;
                             menu = 0;
                         } else {
-                            if(key == 'w' || key == 'a' || key == 's' || key == 'd') {
-                                movePlayer1(key);
-                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l') {
-                                movePlayer2(key);
+                            if(key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'W' || key == 'A' || key == 'S' || key == 'D') {
+                                movimentarJogador1(key, labirinto);
+                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
+                                movimentarJogador2(key, labirinto);
                             }
                             
                             if(checkCollision()) {
@@ -163,6 +158,94 @@ void printarJogadores() {
     printf("%c", JOGADOR2);
 
     screenUpdate();
+}
+
+void limparJogadores() {
+    screenGotoxy(jogador1X + 1, jogador1Y + 1);
+    printf(" ");
+
+    screenGotoxy(jogador2X + 1, jogador2Y + 1);
+    printf(" ");
+
+    screenUpdate();
+}
+
+void movimentarJogador1(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+    limparJogadores();
+    int novoX = jogador1X, novoY = jogador1Y;
+
+    switch(tecla) {
+        case 'w': 
+            novoY--;
+            break;
+        case 'a': 
+            novoX--;
+            break;
+        case 's': 
+            novoY++;
+            break;
+        case 'd': 
+            novoX++;
+            break;
+        case 'W': 
+            novoY--;
+            break;
+        case 'A': 
+            novoX--;
+            break;
+        case 'S': 
+            novoY++;
+            break;
+        case 'D': 
+            novoX++;
+            break;
+    }
+
+    if (labirinto[novoY][novoX] == ' ') {
+        jogador1X = novoX;
+        jogador1Y = novoY;
+    }
+
+    printarJogadores();
+}
+
+void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+    limparJogadores();
+    int novoX = jogador2X, novoY = jogador2Y;
+
+    switch(tecla) {
+        case 'i': 
+            novoY--;
+            break;
+        case 'j': 
+            novoX--;
+            break;
+        case 'k': 
+            novoY++;
+            break;
+        case 'l': 
+            novoX++;
+            break;
+        case 'I': 
+            novoY--;
+            break;
+        case 'J': 
+            novoX--;
+            break;
+        case 'K': 
+            novoY++;
+            break;
+        case 'L': 
+            novoX++;
+            break;
+    }
+
+    if (labirinto[novoY][novoX] == ' ') {
+        jogador2X = novoX;
+        jogador2Y = novoY;
+    }
+
+    printarJogadores();
 }
 
 void updatePlayerRecord(const char *winnerName, const char *filename) {
@@ -247,52 +330,6 @@ void printPlayerRecords(PlayerRecord players[], int playerCount) {
     for (int i = 0; i < playerCount; i++) {
         printf("\t\t\t%s: %d vitórias\n", players[i].name, players[i].wins);
     }
-}
-
-void clearPlayers() {
-    screenGotoxy(jogador1X + 1, jogador1Y + 1);
-    printf(" ");
-    screenGotoxy(jogador2X + 1, jogador2Y + 1);
-    printf(" ");
-    screenUpdate();
-}
-
-void movePlayer1(char direction) {
-    clearPlayers();
-    int newX = jogador1X, newY = jogador1Y;
-
-    switch (direction) {
-        case 'w': newY--; break;
-        case 's': newY++; break;
-        case 'a': newX--; break;
-        case 'd': newX++; break;
-    }
-
-    if (currentMaze[newY][newX] == ' ') {
-        jogador1X = newX;
-        jogador1Y = newY;
-    }
-
-    printarJogadores();
-}
-
-void movePlayer2(char direction) {
-    clearPlayers();
-    int newX = jogador2X, newY = jogador2Y;
-
-    switch (direction) {
-        case 'i': newY--; break;
-        case 'k': newY++; break;
-        case 'j': newX--; break;
-        case 'l': newX++; break;
-    }
-
-    if (currentMaze[newY][newX] == ' ') {
-        jogador2X = newX;
-        jogador2Y = newY;
-    }
-
-    printarJogadores();
 }
 
 int checkCollision() {
