@@ -74,13 +74,7 @@ int main() {
 
                         nome = (char *)malloc(50*sizeof(char));
 
-                        printf("Digite seu nome: ");
-                        fgets(nome, sizeof(nome), stdin);
-                        nome[strcspn(nome, "\n")] = 0;
-                        
-                        fprintf(ranking, "%s", nome);
-
-                        fclose(ranking);
+                        rankearNome(ranking,nome);
 
                         running = 0;
                         menu = 0;
@@ -270,7 +264,7 @@ void rankearNome(FILE *ranking, char *nome) {
     nome = (char *)malloc(50*sizeof(char));
 
     printf("Digite seu nome: ");
-    fgets(nome, sizeof(nome), stdin);
+    fgets(nome, 50, stdin);
     
     fprintf(ranking, "%s", nome);
 
