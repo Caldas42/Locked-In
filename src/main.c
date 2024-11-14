@@ -9,7 +9,7 @@
 #define COMPRIMENTO_LABIRINTO (MAXX - 2)
 #define LARGURA_LABIRINTO (MAXY - 2)
 
-#define JOGADOR1 '0'
+#define JOGADOR1 'V'
 #define JOGADOR2 'A'
 #define X1_INICIAL 10
 #define Y1_INICIAL 10
@@ -21,13 +21,7 @@ int jogador1Y = Y1_INICIAL;
 int jogador2X = X2_INICIAL;
 int jogador2Y = Y2_INICIAL;
 
-#define MAX_NAME_LEN 50
-#define MAX_PLAYERS 100
-
-typedef struct {
-    char name[MAX_NAME_LEN];
-    int wins;
-} PlayerRecord;
+#define TEMPO 60000
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
@@ -36,6 +30,14 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
+
+#define MAX_NAME_LEN 50
+#define MAX_PLAYERS 100
+
+typedef struct {
+    char name[MAX_NAME_LEN];
+    int wins;
+} PlayerRecord;
 
 void updatePlayerRecord(const char *winnerName, const char *filename);
 void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
@@ -54,7 +56,7 @@ int main() {
     printf("██░░░░░░░██░░░██░░░██░░░░░░░█████░░░░█████░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░██████░░░░░██░░░░░██░░░██\n");
     printf("██████░░░▀█████▀░░░▀█████░░░██░░██░░░▀█████░░░██████▀░░░░░░░░░░░░██████░░░██░░░██\n");
-    printf("Você (WASD) acorda preso em um labirinto e o Assassino (IJKL) está em sua procura! Fuja até o tempo acabar ou seja a sua próxima vítma.\n");
+    printf("A Vítima (WASD) acorda presa em um labirinto e o Assassino (IJKL) está em sua procura! A Vítima precisa fugir até o tempo acabar e o Assassino precisa pegá-la antes disso.\n");
     printf("Pressione espaço para começar.\n");
 
     while(menu) {
@@ -65,8 +67,23 @@ int main() {
                 screenInit(1);
                 printarLabirinto(labirinto);
                 printarJogadores();
+                timerInit(TEMPO);
                 
                 while(running) {
+                    if(timerTimeOver()) {
+                        screenClear();
+                        printf("A Vítma escapou! Tempo esgotado.\n");
+                        printf("Digite seu nome:\n");
+
+                        char winnerName[MAX_NAME_LEN];
+                        fgets(winnerName, MAX_NAME_LEN, stdin);
+                        winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
+                        updatePlayerRecord(winnerName, "arquivo.txt");
+
+                        running = 0;
+                        menu = 0;
+                    }
+
                     if(keyhit()) {
                         key = readch();
 
@@ -82,7 +99,8 @@ int main() {
                             
                             if(assassinato()) {
                                 screenClear();
-                                printf("O Assassino venceu! Digite seu nome: ");
+                                printf("O Assassino venceu!");
+                                printf("Digite seu nome:\n");
 
                                 char winnerName[MAX_NAME_LEN];
                                 fgets(winnerName, MAX_NAME_LEN, stdin);
