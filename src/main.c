@@ -73,7 +73,7 @@ int main() {
                             exit(1);
                         }
 
-                        nome = 
+                        nome = (char *)malloc(50*sizeof(char));
 
                         printf("Digite o nome: ");
                         fgets(nome, sizeof(nome), stdin);
