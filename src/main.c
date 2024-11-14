@@ -21,7 +21,7 @@ int jogador1Y = Y1_INICIAL;
 int jogador2X = X2_INICIAL;
 int jogador2Y = Y2_INICIAL;
 
-#define TEMPO 60000
+#define TEMPO 5000
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
@@ -30,6 +30,7 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
+void rankearNome(FILE *ranking, char *nome);
 
 int main() {
     keyboardInit();
@@ -64,10 +65,8 @@ int main() {
                     if(timerTimeOver()) {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
-                        printf("Digite seu nome:\n");
 
                         ranking = fopen("ranking.txt", "a");
-
                         if(ranking == NULL){
                             printf("Erro no ranking\n");
                             exit(1);
@@ -75,14 +74,11 @@ int main() {
 
                         nome = (char *)malloc(50*sizeof(char));
 
-                        printf("Digite o nome: ");
+                        printf("Digite seu nome: ");
                         fgets(nome, sizeof(nome), stdin);
-
-                        // Remove o caractere de nova linha que fgets armazena, se presente
                         nome[strcspn(nome, "\n")] = 0;
-
-                        // Escreve o nome e o número no arquivo
-                        fprintf(ranking, "%s\n", nome);
+                        
+                        fprintf(ranking, "%s", nome);
 
                         fclose(ranking);
 
@@ -263,4 +259,20 @@ void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
 
 int assassinato() {
     return jogador1X == jogador2X && jogador1Y == jogador2Y;
+}
+
+void rankearNome(FILE *ranking, char *nome) {
+    if(ranking == NULL){
+        printf("Erro no ranking\n");
+        exit(1);
+    }
+
+    nome = (char *)malloc(50*sizeof(char));
+
+    printf("Digite seu nome: ");
+    fgets(nome, sizeof(nome), stdin);
+    
+    fprintf(ranking, "%s", nome);
+
+    fclose(ranking);
 }
