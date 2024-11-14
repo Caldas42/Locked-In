@@ -31,25 +31,16 @@ void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][CO
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
 
-#define MAX_NAME_LEN 50
-#define MAX_PLAYERS 100
-
-typedef struct {
-    char name[MAX_NAME_LEN];
-    int wins;
-} PlayerRecord;
-
-void updatePlayerRecord(const char *winnerName, const char *filename);
-void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount);
-void sortPlayersByWins(PlayerRecord players[], int playerCount);
-void printPlayerRecords(PlayerRecord players[], int playerCount);
-
 int main() {
     keyboardInit();
+
     int menu = 1, running = 1;
-    char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2];
+    char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2], *nome;
+
     srand(time(NULL));
     gerarLabirinto(labirinto);
+
+    FILE *ranking;
 
     printf("██░░░░░░░▄█████▄░░░▄█████░░░██░░██░░░▄█████░░░██████▄░░░░░░░░░░░░██████░░░██████▄\n");
     printf("██░░░░░░░██░░░██░░░██░░░░░░░██░░██░░░██░░░░░░░██░░░██░░░░░░░░░░░░░░██░░░░░██░░░██\n");
@@ -75,10 +66,25 @@ int main() {
                         printf("A Vítma escapou! Tempo esgotado.\n");
                         printf("Digite seu nome:\n");
 
-                        char winnerName[MAX_NAME_LEN];
-                        fgets(winnerName, MAX_NAME_LEN, stdin);
-                        winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
-                        updatePlayerRecord(winnerName, "arquivo.txt");
+                        ranking = fopen("ranking.txt", "a");
+
+                        if(ranking == NULL){
+                            printf("Erro no ranking\n");
+                            exit(1);
+                        }
+
+                        nome = 
+
+                        printf("Digite o nome: ");
+                        fgets(nome, sizeof(nome), stdin);
+
+                        // Remove o caractere de nova linha que fgets armazena, se presente
+                        nome[strcspn(nome, "\n")] = 0;
+
+                        // Escreve o nome e o número no arquivo
+                        fprintf(ranking, "%s\n", nome);
+
+                        fclose(ranking);
 
                         running = 0;
                         menu = 0;
@@ -102,11 +108,6 @@ int main() {
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
 
-                                char winnerName[MAX_NAME_LEN];
-                                fgets(winnerName, MAX_NAME_LEN, stdin);
-                                winnerName[strcspn(winnerName, "\n")] = '\0'; // Remover o caractere de nova linha
-                                updatePlayerRecord(winnerName, "arquivo.txt");
-
                                 running = 0;
                                 menu = 0;
                             }
@@ -121,13 +122,6 @@ int main() {
 
     keyboardDestroy();
     screenDestroy();
-
-    // Exibir o ranking dos vencedores
-    PlayerRecord players[MAX_PLAYERS];
-    int playerCount = 0;
-    loadPlayerRecords("arquivo.txt", players, &playerCount);
-    sortPlayersByWins(players, playerCount);
-    printPlayerRecords(players, playerCount);
 
     return 0;
 }
@@ -269,88 +263,4 @@ void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
 
 int assassinato() {
     return jogador1X == jogador2X && jogador1Y == jogador2Y;
-}
-
-void updatePlayerRecord(const char *winnerName, const char *filename) {
-    PlayerRecord players[MAX_PLAYERS];
-    int playerCount = 0;
-    int found = 0;
-
-    // Abre o arquivo em modo de leitura para carregar dados existentes
-    FILE *file = fopen(filename, "r");
-    if (file) {
-        while (fscanf(file, "%s %d", players[playerCount].name, &players[playerCount].wins) == 2) {
-            if (strcmp(players[playerCount].name, winnerName) == 0) {
-                players[playerCount].wins++;
-                found = 1;
-            }
-            playerCount++;
-            if (playerCount >= MAX_PLAYERS) break;
-        }
-        fclose(file);
-    }
-
-    // Se o vencedor não foi encontrado, adiciona-o ao final da lista
-    if (!found && playerCount < MAX_PLAYERS) {
-        strncpy(players[playerCount].name, winnerName, MAX_NAME_LEN);
-        players[playerCount].wins = 1;
-        playerCount++;
-    }
-
-    // Abre o arquivo em modo de adição e grava apenas o novo vencedor
-    if (!found) {
-        file = fopen(filename, "a");
-        if (file) {
-            fprintf(file, "%s %d\n", winnerName, 1);
-            fclose(file);
-        } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", filename);
-        }
-    } else {
-        // Sobrescreve o arquivo somente quando o vencedor já existe
-        file = fopen(filename, "w");
-        if (file) {
-            for (int i = 0; i < playerCount; i++) {
-                fprintf(file, "%s %d\n", players[i].name, players[i].wins);
-            }
-            fclose(file);
-        } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", filename);
-        }
-    }
-}
-
-void loadPlayerRecords(const char *filename, PlayerRecord players[], int *playerCount) {
-    *playerCount = 0;
-    FILE *file = fopen(filename, "r");
-    
-    if (file) {
-        while (fscanf(file, "%s %d", players[*playerCount].name, &players[*playerCount].wins) == 2) {
-            (*playerCount)++;
-            if (*playerCount >= MAX_PLAYERS) break;
-        }
-        fclose(file);
-    } else {
-        printf("Erro ao abrir o arquivo %s.\n", filename);
-    }
-}
-
-void sortPlayersByWins(PlayerRecord players[], int playerCount) {
-    for (int i = 0; i < playerCount - 1; i++) {
-        for (int j = i + 1; j < playerCount; j++) {
-            if (players[i].wins < players[j].wins) {
-                PlayerRecord temp = players[i];
-                players[i] = players[j];
-                players[j] = temp;
-            }
-        }
-    }
-}
-
-void printPlayerRecords(PlayerRecord players[], int playerCount) {
-    printf("\n\t\t\tRanking de Vencedores:\n");
-    
-    for (int i = 0; i < playerCount; i++) {
-        printf("\t\t\t%s: %d vitórias\n", players[i].name, players[i].wins);
-    }
 }
