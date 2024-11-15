@@ -69,7 +69,7 @@ int main() {
                         ranking = fopen("rankingVitima.txt", "a");
 
                         if(ranking == NULL){
-                            printf("Erro no ranking\n");
+                            printf("Erro ao abrir o arquivo de ranking\n");
                             exit(1);
                         }
 
@@ -101,7 +101,7 @@ int main() {
                                 ranking = fopen("rankingAssassino.txt", "a");
                         
                                 if(ranking == NULL){
-                                    printf("Erro no ranking\n");
+                                    printf("Erro ao abrir o arquivo de ranking\n");
                                     exit(1);
                                 }
 
