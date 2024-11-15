@@ -23,6 +23,13 @@ int jogador2Y = Y2_INICIAL;
 
 #define TEMPO 60000
 
+#define JOGADORES 100
+
+struct rank {
+    char nome[50];
+    int vitorias;
+};
+
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarJogadores();
@@ -30,13 +37,17 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
-void rankear(FILE *ranking, char *nome);
+
+void updatePlayerRecord(char *vencedor, char *filename);
+void loadPlayerRecords(const char *filename, struct rank players[], int *playerCount);
+void sortPlayersByWins(struct rank players[], int playerCount);
+void printPlayerRecords(struct rank players[], int playerCount);
 
 int main() {
     keyboardInit();
 
     int menu = 1, running = 1;
-    char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2], *nome;
+    char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2], vencedor[50];
 
     srand(time(NULL));
     gerarLabirinto(labirinto);
@@ -73,7 +84,7 @@ int main() {
                             exit(1);
                         }
 
-                        rankear(ranking, nome);
+                        //rankear(ranking, nome);
                         fclose(ranking);
 
                         running = 0;
@@ -97,16 +108,10 @@ int main() {
                                 screenClear();
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
-
-                                ranking = fopen("rankingAssassino.txt", "a");
-                        
-                                if(ranking == NULL){
-                                    printf("Erro ao abrir o arquivo de ranking\n");
-                                    exit(1);
-                                }
-
-                                rankear(ranking, nome);
-                                fclose(ranking);
+                                
+                                fgets(vencedor, 50, stdin);
+                                vencedor[strcspn(vencedor, "\n")] = '\0';
+                                updatePlayerRecord(vencedor, "rankingAssassino.txt");
 
                                 running = 0;
                                 menu = 0;
@@ -122,6 +127,14 @@ int main() {
 
     keyboardDestroy();
     screenDestroy();
+    timerDestroy();
+
+    // Exibir o ranking dos vencedores
+    struct rank players[JOGADORES];
+    int playerCount = 0;
+    loadPlayerRecords("rankingAssassino.txt", players, &playerCount);
+    sortPlayersByWins(players, playerCount);
+    printPlayerRecords(players, playerCount);
 
     return 0;
 }
@@ -265,19 +278,87 @@ int assassinato() {
     return jogador1X == jogador2X && jogador1Y == jogador2Y;
 }
 
-void rankear(FILE *ranking, char *nome) {
-    nome = (char *)malloc(50*sizeof(char));
-    int delay = 1;
+void updatePlayerRecord(char *vencedor, char *ranking) {
+    struct rank jogadores[JOGADORES];
+    int cont = 0;
+    int found = 0;
 
-    timerInit(2000);
+    FILE *ranking = fopen(ranking, "r");
 
-    while(delay) {
-        if(timerTimeOver()) {
-            delay = 0;
+    if (ranking == NULL) {
+       exit(1);
+    } else {
+        while (fscanf(ranking, "%s %d", jogadores[cont].nome, &jogadores[cont].vitorias) == 2) {
+            if (strcmp(jogadores[cont].nome, vencedor) == 0) {
+                jogadores[cont].vitorias++;
+                found = 1;
+            }
+            cont++;
+            if (cont >= JOGADORES) break;
+        }
+
+        fclose(ranking);
+    }
+
+    // Se o vencedor não foi encontrado, adiciona-o ao final da lista
+    if (!found && cont < JOGADORES) {
+        strncpy(jogadores[cont].nome, vencedor, 50);
+        jogadores[cont].vitorias = 1;
+        cont++;
+    }
+
+    // Abre o arquivo em modo de adição e grava apenas o novo vencedor
+    if (!found) {
+        ranking = fopen(ranking, "a");
+        if (ranking) {
+            fprintf(ranking, "%s %d\n", vencedor, 1);
+            fclose(ranking);
+        } else {
+            printf("Erro ao abrir o arquivo %s para gravação.\n", ranking);
+        }
+    } else {
+        // Sobrescreve o arquivo somente quando o vencedor já existe
+        ranking = fopen(ranking, "w");
+        if (ranking) {
+            for (int i = 0; i < cont; i++) {
+                fprintf(ranking, "%s %d\n", jogadores[i].nome, jogadores[i].vitorias);
+            }
+            fclose(ranking);
+        } else {
+            printf("Erro ao abrir o arquivo %s para gravação.\n", ranking);
         }
     }
+}
+
+void loadPlayerRecords(const char *filename, struct rank players[], int *playerCount) {
+    *playerCount = 0;
+    FILE *file = fopen(filename, "r");
     
-    printf("Digite seu nome: ");
-    fgets(nome, 50, stdin);
-    fprintf(ranking, "%s", nome);
+    if (file) {
+        while (fscanf(file, "%s %d", players[*playerCount].nome, &players[*playerCount].vitorias) == 2) {
+            (*playerCount)++;
+            if (*playerCount >= JOGADORES) break;
+        }
+        fclose(file);
+    } else {
+        printf("Erro ao abrir o arquivo %s.\n", filename);
+    }
+}
+void sortPlayersByWins(struct rank players[], int playerCount) {
+    for (int i = 0; i < playerCount - 1; i++) {
+        for (int j = i + 1; j < playerCount; j++) {
+            if (players[i].vitorias < players[j].vitorias) {
+                struct rank temp = players[i];
+                players[i] = players[j];
+                players[j] = temp;
+            }
+        }
+    }
+}
+void printPlayerRecords(struct rank players[], int playerCount) {
+    printf("\n\t\t\tRanking de Vencedores:\n");
+    
+    for (int i = 0; i < playerCount; i++) {
+        printf("\t\t\t%s: %d vitórias\n", players[i].nome, players[i].vitorias);
+    }
 }
