@@ -53,3 +53,8 @@ void timerPrint()
 {
     printf("Timer:  %d", getTimeDiff());
 }
+
+int timerTimeLeft() {
+    int elapsed = getTimeDiff(); // Tempo decorrido em milissegundos
+    int remaining = delay - elapsed; // Tempo restante
+}

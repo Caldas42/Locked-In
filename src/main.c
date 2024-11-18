@@ -37,7 +37,6 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
-void printartimer();
 void atualizarRanking(char *vencedor, char *arquivo);
 void printarRanking(char *arquivo, struct rank jogadores[]);
 
@@ -69,12 +68,17 @@ int main() {
                 printarLabirinto(labirinto);
                 printarJogadores();
                 timerInit(TEMPO);
-                printartimer();
                 
                 while (running) {
+                    int tempoRestante = timerTimeLeft(); // Em milissegundos
+                    screenSetColor(YELLOW, BLACK);
+                    screenGotoxy(1, 1); // Posição fixa no topo esquerdo
+                    printf("Tempo restante: %02d:%02d\n", tempoRestante / 1000 / 60, (tempoRestante / 1000) % 60);
+                    screenUpdate();
                     if (timerTimeOver()) {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
+                        printf("Digite seu nome:\n");
 
                         scanf("%s", vencedor);
                         atualizarRanking(vencedor, "rankingVitimas.txt");
@@ -167,12 +171,6 @@ void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINT
 
     screenUpdate();
 }
-
-void printartimer(){
-    screenGotoxy(35,24);
-    timerPrint(TEMPO);
-}
-
 
 void printarJogadores() {
     screenSetColor(BLUE, DARKGRAY);
@@ -280,7 +278,8 @@ int assassinato() {
 
 void atualizarRanking(char *vencedor, char *arquivo) {
     struct rank jogadores[JOGADORES];
-    int cont = 0, encontrado = 0;
+    int cont = 0;
+    int encontrado = 0;
 
     FILE *ranking = fopen(arquivo, "r");
 
