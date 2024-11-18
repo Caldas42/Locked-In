@@ -357,6 +357,6 @@ void printarRanking(char *arquivo, struct rank jogadores[]) {
     }
 
     for (int i = 0; i < cont; i++) {
-        printf("\t\t\t%s: %d vitórias\n", jogadores[i].nome, jogadores[i].vitorias);
+        printf("\t\t\t%s: %d vitória(s)\n", jogadores[i].nome, jogadores[i].vitorias);
     }
 }
