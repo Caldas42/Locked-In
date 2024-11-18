@@ -77,15 +77,10 @@ int main() {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
 
-                        ranking = fopen("rankingVitima.txt", "a");
+                        
 
-                        if(ranking == NULL){
-                            printf("Erro ao abrir o arquivo de ranking\n");
-                            exit(1);
-                        }
-
-                        //rankear(ranking, nome);
-                        fclose(ranking);
+                        
+                        
 
                         running = 0;
                         menu = 0;
@@ -100,7 +95,9 @@ int main() {
                         } else {
                             if(key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'W' || key == 'A' || key == 'S' || key == 'D') {
                                 movimentarJogador1(key, labirinto);
-                            } else if(key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
+                            }
+                            
+                            if(key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
                                 movimentarJogador2(key, labirinto);
                             }
                             
@@ -278,12 +275,12 @@ int assassinato() {
     return jogador1X == jogador2X && jogador1Y == jogador2Y;
 }
 
-void updatePlayerRecord(char *vencedor, char *ranking) {
+void updatePlayerRecord(char *vencedor, char *file) {
     struct rank jogadores[JOGADORES];
     int cont = 0;
     int found = 0;
 
-    FILE *ranking = fopen(ranking, "r");
+    FILE *ranking = fopen(file, "r");
 
     if (ranking == NULL) {
        exit(1);
@@ -309,23 +306,23 @@ void updatePlayerRecord(char *vencedor, char *ranking) {
 
     // Abre o arquivo em modo de adição e grava apenas o novo vencedor
     if (!found) {
-        ranking = fopen(ranking, "a");
+        ranking = fopen(file, "a");
         if (ranking) {
             fprintf(ranking, "%s %d\n", vencedor, 1);
             fclose(ranking);
         } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", ranking);
+            printf("Erro ao abrir o arquivo %s para gravação.\n", file);
         }
     } else {
         // Sobrescreve o arquivo somente quando o vencedor já existe
-        ranking = fopen(ranking, "w");
+        ranking = fopen(file, "w");
         if (ranking) {
             for (int i = 0; i < cont; i++) {
                 fprintf(ranking, "%s %d\n", jogadores[i].nome, jogadores[i].vitorias);
             }
             fclose(ranking);
         } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", ranking);
+            printf("Erro ao abrir o arquivo %s para gravação.\n", file);
         }
     }
 }
