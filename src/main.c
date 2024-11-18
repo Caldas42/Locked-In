@@ -34,7 +34,6 @@ struct rank {
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarJogadores();
-void tempoRestante();
 void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void delay();
@@ -71,7 +70,11 @@ int main() {
                 timerInit(TEMPO_DE_JOGO);
                 
                 while (running) {
-                    tempoRestante();
+                    screenSetColor(YELLOW, BLACK);
+                    screenGotoxy(1, 1);
+
+                    timerPrint();
+                    screenUpdate();
 
                     if (timerTimeOver()) {
                         screenClear();
@@ -181,14 +184,6 @@ void printarJogadores() {
     screenGotoxy(assassinoX + 1, assassinoY + 1);
     printf("%c", ASSASSINO);
 
-    screenUpdate();
-}
-
-void tempoRestante() {
-    screenSetColor(YELLOW, BLACK);
-    screenGotoxy(1, 1);
-
-    timerPrint();
     screenUpdate();
 }
 
