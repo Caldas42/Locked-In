@@ -9,17 +9,17 @@
 #define COMPRIMENTO_LABIRINTO (MAXX - 2)
 #define LARGURA_LABIRINTO (MAXY - 2)
 
-#define JOGADOR1 'V'
-#define JOGADOR2 'A'
+#define VITIMA 'V'
+#define ASSASSINO 'A'
 #define X1_INICIAL 10
 #define Y1_INICIAL 10
 #define X2_INICIAL 60
 #define Y2_INICIAL 20
 
-int jogador1X = X1_INICIAL;
-int jogador1Y = Y1_INICIAL;
-int jogador2X = X2_INICIAL;
-int jogador2Y = Y2_INICIAL;
+int vitimaX = X1_INICIAL;
+int vitimaY = Y1_INICIAL;
+int assassinoX = X2_INICIAL;
+int assassinoY = Y2_INICIAL;
 
 #define TEMPO_DE_JOGO 60000
 
@@ -34,8 +34,8 @@ void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO 
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarJogadores();
 void tempoRestante();
-void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
 void atualizarRanking(char *vencedor, char *arquivo);
 void printarRanking(char *arquivo, struct rank jogadores[]);
@@ -92,11 +92,11 @@ int main() {
                             menu = 0;
                         } else {
                             if (key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'W' || key == 'A' || key == 'S' || key == 'D') {
-                                movimentarJogador1(key, labirinto);
+                                movimentarVitima(key, labirinto);
                             }
                             
                             if (key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
-                                movimentarJogador2(key, labirinto);
+                                movimentarAssassino(key, labirinto);
                             }
                             
                             if (assassinato()) {
@@ -171,12 +171,12 @@ void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINT
 
 void printarJogadores() {
     screenSetColor(BLUE, BLACK);
-    screenGotoxy(jogador1X + 1, jogador1Y + 1);
-    printf("%c", JOGADOR1);
+    screenGotoxy(vitimaX + 1, vitimaY + 1);
+    printf("%c", VITIMA);
 
     screenSetColor(RED, BLACK);
-    screenGotoxy(jogador2X + 1, jogador2Y + 1);
-    printf("%c", JOGADOR2);
+    screenGotoxy(assassinoX + 1, assassinoY + 1);
+    printf("%c", ASSASSINO);
 
     screenUpdate();
 }
@@ -189,10 +189,10 @@ void tempoRestante() {
     screenUpdate();
 }
 
-void movimentarJogador1(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
-    int novoX = jogador1X, novoY = jogador1Y;
+void movimentarVitima(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+    int novoX = vitimaX, novoY = vitimaY;
 
-    screenGotoxy(jogador1X + 1, jogador1Y + 1);
+    screenGotoxy(vitimaX + 1, vitimaY + 1);
     printf(" ");
     screenUpdate();
 
@@ -224,17 +224,17 @@ void movimentarJogador1(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
     }
 
     if (labirinto[novoY][novoX] == ' ') {
-        jogador1X = novoX;
-        jogador1Y = novoY;
+        vitimaX = novoX;
+        vitimaY = novoY;
     }
 
     printarJogadores();
 }
 
-void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
-    int novoX = jogador2X, novoY = jogador2Y;
+void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+    int novoX = assassinoX, novoY = assassinoY;
 
-    screenGotoxy(jogador2X + 1, jogador2Y + 1);
+    screenGotoxy(assassinoX + 1, assassinoY + 1);
     printf(" ");
     screenUpdate();
 
@@ -266,15 +266,15 @@ void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
     }
 
     if (labirinto[novoY][novoX] == ' ') {
-        jogador2X = novoX;
-        jogador2Y = novoY;
+        assassinoX = novoX;
+        assassinoY = novoY;
     }
 
     printarJogadores();
 }
 
 int assassinato() {
-    return jogador1X == jogador2X && jogador1Y == jogador2Y;
+    return vitimaX == assassinoX && vitimaY == assassinoY;
 }
 
 void atualizarRanking(char *vencedor, char *arquivo) {
