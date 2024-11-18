@@ -38,10 +38,7 @@ void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][CO
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
 void atualizarRanking(char *vencedor, char *arquivo);
-
-void loadPlayerRecords(const char *filename, struct rank players[], int *playerCount);
-void sortPlayersByWins(struct rank players[], int playerCount);
-void printPlayerRecords(struct rank players[], int playerCount);
+void printarRanking(char *arquivo, struct rank jogadores[]);
 
 int main() {
     keyboardInit();
@@ -62,50 +59,50 @@ int main() {
     printf("A Vítima (WASD) acorda presa em um labirinto e o Assassino (IJKL) está em sua procura! A Vítima precisa fugir até o tempo acabar e o Assassino precisa pegá-la antes disso.\n");
     printf("Pressione espaço para começar.\n");
 
-    while(menu) {
-        if(keyhit()) {
+    while (menu) {
+        if (keyhit()) {
             key = readch();
 
-            if(key == 32) {
+            if (key == 32) {
                 screenInit(1);
                 printarLabirinto(labirinto);
                 printarJogadores();
                 timerInit(TEMPO);
                 
-                while(running) {
-                    if(timerTimeOver()) {
+                while (running) {
+                    if (timerTimeOver()) {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
 
                         scanf("%s", vencedor);
-                        atualizarRanking(vencedor, "rankingVitima.txt");
+                        atualizarRanking(vencedor, "rankingVitimas.txt");
                         
                         running = 0;
                         menu = 0;
                     }
 
-                    if(keyhit()) {
+                    if (keyhit()) {
                         key = readch();
 
-                        if(key == 27) {
+                        if (key == 27) {
                             running = 0;
                             menu = 0;
                         } else {
-                            if(key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'W' || key == 'A' || key == 'S' || key == 'D') {
+                            if (key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'W' || key == 'A' || key == 'S' || key == 'D') {
                                 movimentarJogador1(key, labirinto);
                             }
                             
-                            if(key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
+                            if (key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'I' || key == 'J' || key == 'K' || key == 'L') {
                                 movimentarJogador2(key, labirinto);
                             }
                             
-                            if(assassinato()) {
+                            if (assassinato()) {
                                 screenClear();
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
                                 
                                 scanf("%s", vencedor);
-                                atualizarRanking(vencedor, "rankingAssassino.txt");
+                                atualizarRanking(vencedor, "rankingAssassinos.txt");
 
                                 running = 0;
                                 menu = 0;
@@ -113,7 +110,7 @@ int main() {
                         }
                     }
                 }
-            } else if(key == 27) {
+            } else if (key == 27) {
                 menu = 0;
             }
         }
@@ -122,31 +119,32 @@ int main() {
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
-    
+
     struct rank jogadores[JOGADORES];
 
-    int playerCount = 0;
-    loadPlayerRecords("rankingAssassino.txt", jogadores, &playerCount);
-    sortPlayersByWins(jogadores, playerCount);
-    printPlayerRecords(jogadores, playerCount);
+    printf("\nRanking de Vítimas:\n");
+    printarRanking("rankingVitimas.txt", jogadores);
+
+    printf("\nRanking de Assassinos:\n");
+    printarRanking("rankingAssassinos.txt", jogadores);
 
     return 0;
 }
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
-    for(int i = 0; i < COMPRIMENTO_LABIRINTO + 2; i++) {
+    for (int i = 0; i < COMPRIMENTO_LABIRINTO + 2; i++) {
         labirinto[0][i] = '-';
         labirinto[LARGURA_LABIRINTO + 1][i] = '-';
     }
 
-    for(int i = 1; i <= LARGURA_LABIRINTO; i++) {
+    for (int i = 1; i <= LARGURA_LABIRINTO; i++) {
         labirinto[i][0] = '|';
         labirinto[i][COMPRIMENTO_LABIRINTO + 1] = '|';
     }
 
-    for(int i = 1; i <= LARGURA_LABIRINTO; i++) {
-        for(int j = 1; j <= COMPRIMENTO_LABIRINTO; j++) {
-            if(rand() % 5 == 0) {
+    for (int i = 1; i <= LARGURA_LABIRINTO; i++) {
+        for (int j = 1; j <= COMPRIMENTO_LABIRINTO; j++) {
+            if (rand() % 5 == 0) {
                 labirinto[i][j] = '|';
             } else {
                 labirinto[i][j] = ' ';
@@ -158,8 +156,8 @@ void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO 
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
     screenSetColor(WHITE, BLACK);
 
-    for(int i = 0; i < LARGURA_LABIRINTO + 2; i++) {
-        for(int j = 0; j < COMPRIMENTO_LABIRINTO + 2; j++) {
+    for (int i = 0; i < LARGURA_LABIRINTO + 2; i++) {
+        for (int j = 0; j < COMPRIMENTO_LABIRINTO + 2; j++) {
             screenGotoxy(j + 1, i + 1);
             printf("%c", labirinto[i][j]);
         }
@@ -328,37 +326,37 @@ void atualizarRanking(char *vencedor, char *arquivo) {
     }
 }
 
-void loadPlayerRecords(const char *filename, struct rank players[], int *playerCount) {
-    *playerCount = 0;
-    FILE *file = fopen(filename, "r");
-    
-    if (file) {
-        while (fscanf(file, "%s %d", players[*playerCount].nome, &players[*playerCount].vitorias) == 2) {
-            (*playerCount)++;
-            if (*playerCount >= JOGADORES) break;
-        }
-        fclose(file);
-    } else {
-        printf("Erro ao abrir o arquivo %s.\n", filename);
-    }
-}
+void printarRanking(char *arquivo, struct rank jogadores[]) {
+    int cont = 0;
 
-void sortPlayersByWins(struct rank players[], int playerCount) {
-    for (int i = 0; i < playerCount - 1; i++) {
-        for (int j = i + 1; j < playerCount; j++) {
-            if (players[i].vitorias < players[j].vitorias) {
-                struct rank temp = players[i];
-                players[i] = players[j];
-                players[j] = temp;
+    FILE *ranking = fopen(arquivo, "r");
+    
+    if (ranking) {
+        while (fscanf(ranking, "%s %d", jogadores[cont].nome, &jogadores[cont].vitorias) == 2) {
+            cont++;
+
+            if (cont >= JOGADORES) {
+                break;
+            }
+        }
+
+        fclose(ranking);
+    } else {
+        printf("Erro ao abrir o arquivo %s.\n", arquivo);
+        exit(1);
+    }
+
+    for (int i = 0; i < cont - 1; i++) {
+        for (int j = i + 1; j < cont; j++) {
+            if (jogadores[i].vitorias < jogadores[j].vitorias) {
+                struct rank temp = jogadores[i];
+                jogadores[i] = jogadores[j];
+                jogadores[j] = temp;
             }
         }
     }
-}
 
-void printPlayerRecords(struct rank players[], int playerCount) {
-    printf("\n\t\t\tRanking de Vencedores:\n");
-    
-    for (int i = 0; i < playerCount; i++) {
-        printf("\t\t\t%s: %d vitórias\n", players[i].nome, players[i].vitorias);
+    for (int i = 0; i < cont; i++) {
+        printf("\t\t\t%s: %d vitórias\n", jogadores[i].nome, jogadores[i].vitorias);
     }
 }
