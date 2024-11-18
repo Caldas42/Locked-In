@@ -22,7 +22,7 @@ int assassinoX = X2_INICIAL;
 int assassinoY = Y2_INICIAL;
 
 #define TEMPO_DE_JOGO 60000
-#define DELAY 1000
+#define DELAY 2000
 
 #define JOGADORES 100
 
@@ -279,7 +279,7 @@ void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPR
 void delay() {
     timerInit(DELAY);
 
-    while (timerTimeLeft() != 0) {
+    while (timerTimeOver() != TEMPO_DE_JOGO) {
         if (timerTimeOver) {
             break;
         }
