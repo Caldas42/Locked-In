@@ -37,7 +37,6 @@ void printarJogadores();
 void tempoRestante();
 void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-int assassinato();
 void delay();
 void atualizarRanking(char *vencedor, char *arquivo);
 void printarRanking(char *arquivo, struct rank jogadores[]);
@@ -102,7 +101,7 @@ int main() {
                                 movimentarAssassino(key, labirinto);
                             }
                             
-                            if (assassinato()) {
+                            if (vitimaX == assassinoX && vitimaY == assassinoY) {
                                 screenClear();
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
@@ -275,10 +274,6 @@ void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPR
     }
 
     printarJogadores();
-}
-
-int assassinato() {
-    return vitimaX == assassinoX && vitimaY == assassinoY;
 }
 
 void delay() {
