@@ -188,7 +188,7 @@ void tempoRestante() {
     screenSetColor(YELLOW, BLACK);
     screenGotoxy(1, 1);
 
-    printf("Tempo restante: %02d:%02d\n", timerTimeLeft() / 1000 / 60, (timerTimeLeft() / 1000) % 60);
+    timerPrint();
     screenUpdate();
 }
 
