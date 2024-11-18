@@ -77,8 +77,7 @@ int main() {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
 
-                        fgets(vencedor, 50, stdin);
-                        vencedor[strcspn(vencedor, "\n")] = '\0';
+                        scanf("%s", vencedor);
                         atualizarRanking(vencedor, "rankingVitima.txt");
                         
                         running = 0;
@@ -105,8 +104,7 @@ int main() {
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
                                 
-                                fgets(vencedor, 50, stdin);
-                                vencedor[strcspn(vencedor, "\n")] = '\0';
+                                scanf("%s", vencedor);
                                 atualizarRanking(vencedor, "rankingAssassino.txt");
 
                                 running = 0;
@@ -124,9 +122,9 @@ int main() {
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
-
     
     struct rank jogadores[JOGADORES];
+
     int playerCount = 0;
     loadPlayerRecords("rankingAssassino.txt", jogadores, &playerCount);
     sortPlayersByWins(jogadores, playerCount);
