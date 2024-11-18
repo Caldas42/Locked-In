@@ -319,25 +319,25 @@ void atualizarRanking(char *vencedor, char *arquivo) {
 
         ranking = fopen(arquivo, "a");
 
-        if (ranking) {
-            fprintf(ranking, "%s %d\n", vencedor, 1);
-            fclose(ranking);
-        } else {
+        if (ranking == NULL) {
             printf("Erro ao abrir o arquivo %s.\n", arquivo);
             exit(1);
+        } else {
+            fprintf(ranking, "%s %d\n", vencedor, 1);
+            fclose(ranking);
         }
     } else {
         ranking = fopen(arquivo, "w");
 
-        if (ranking) {
+        if (ranking == NULL) {
+            printf("Erro ao abrir o arquivo %s.\n", arquivo);
+            exit(1);
+        } else {
             for (int i = 0; i < cont; i++) {
                 fprintf(ranking, "%s %d\n", jogadores[i].nome, jogadores[i].vitorias);
             }
 
             fclose(ranking);
-        } else {
-            printf("Erro ao abrir o arquivo %s.\n", arquivo);
-            exit(1);
         }
     }
 }
@@ -347,7 +347,10 @@ void printarRanking(char *arquivo, struct rank jogadores[]) {
 
     FILE *ranking = fopen(arquivo, "r");
     
-    if (ranking) {
+    if (ranking == NULL) {
+        printf("Erro ao abrir o arquivo %s.\n", arquivo);
+        exit(1);
+    } else {
         while (fscanf(ranking, "%s %d", jogadores[cont].nome, &jogadores[cont].vitorias) == 2) {
             cont++;
 
@@ -357,9 +360,6 @@ void printarRanking(char *arquivo, struct rank jogadores[]) {
         }
 
         fclose(ranking);
-    } else {
-        printf("Erro ao abrir o arquivo %s.\n", arquivo);
-        exit(1);
     }
 
     for (int i = 0; i < cont - 1; i++) {
