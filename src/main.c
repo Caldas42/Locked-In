@@ -278,51 +278,55 @@ int assassinato() {
 void atualizarRanking(char *vencedor, char *arquivo) {
     struct rank jogadores[JOGADORES];
     int cont = 0;
-    int found = 0;
+    int encontrado = 0;
 
     FILE *ranking = fopen(arquivo, "r");
 
     if (ranking == NULL) {
-       exit(1);
+        printf("Erro ao abrir o arquivo %s.\n", arquivo);
+        exit(1);
     } else {
         while (fscanf(ranking, "%s %d", jogadores[cont].nome, &jogadores[cont].vitorias) == 2) {
             if (strcmp(jogadores[cont].nome, vencedor) == 0) {
                 jogadores[cont].vitorias++;
-                found = 1;
+                encontrado = 1;
             }
+
             cont++;
-            if (cont >= JOGADORES) break;
+
+            if (cont >= JOGADORES) {
+                break;
+            }
         }
 
         fclose(ranking);
     }
 
-    // Se o vencedor não foi encontrado, adiciona-o ao final da lista
-    if (!found && cont < JOGADORES) {
+    if (!encontrado) {
         strncpy(jogadores[cont].nome, vencedor, 50);
         jogadores[cont].vitorias = 1;
-        cont++;
-    }
 
-    // Abre o arquivo em modo de adição e grava apenas o novo vencedor
-    if (!found) {
         ranking = fopen(arquivo, "a");
+
         if (ranking) {
             fprintf(ranking, "%s %d\n", vencedor, 1);
             fclose(ranking);
         } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", arquivo);
+            printf("Erro ao abrir o arquivo %s.\n", arquivo);
+            exit(1);
         }
     } else {
-        // Sobrescreve o arquivo somente quando o vencedor já existe
         ranking = fopen(arquivo, "w");
+
         if (ranking) {
             for (int i = 0; i < cont; i++) {
                 fprintf(ranking, "%s %d\n", jogadores[i].nome, jogadores[i].vitorias);
             }
+
             fclose(ranking);
         } else {
-            printf("Erro ao abrir o arquivo %s para gravação.\n", arquivo);
+            printf("Erro ao abrir o arquivo %s.\n", arquivo);
+            exit(1);
         }
     }
 }
