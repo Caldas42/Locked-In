@@ -77,11 +77,10 @@ int main() {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
 
+                        fgets(vencedor, 50, stdin);
+                        vencedor[strcspn(vencedor, "\n")] = '\0';
+                        atualizarRanking(vencedor, "rankingVitima.txt");
                         
-
-                        
-                        
-
                         running = 0;
                         menu = 0;
                     }
