@@ -33,8 +33,8 @@ Locked In é um jogo multiplayer local competitivo que se passa em um labirinto 
 
 ## 🎲 Objetivo do Jogo
 
-- A Vítima (Jogador 1): Sobreviver no labirinto até o tempo acabar, evitando o assassino.
-- O Assassino (Jogador 2): Encontrar e capturar a vítima antes que o tempo acabe.
+- A Vítima: Sobreviver no labirinto até o tempo acabar, evitando o assassino.
+- O Assassino: Capturar a vítima antes que o tempo acabe.
 
 O jogo termina quando:
 
