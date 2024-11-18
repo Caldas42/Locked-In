@@ -29,16 +29,25 @@
 
 ## 📄 Descrição
 
-Locked In é um jogo top down em linha de comando onde o jogador acorda preso em um porão, sequestrado por um assassino. Para escapar, ele precisa resolver enigmas desafiadores que testam lógica e observação. Com puzzles inteligentes, uma atmosfera tensa e múltiplos desfechos, Locked In desafia sua mente até o último segundo.
+Locked In é um jogo multiplayer local competitivo que se passa em um labirinto gerado aleatoriamente. Dois jogadores assumem os papéis de "A Vítima" e "O Assassino". Enquanto a Vítima tenta sobreviver até o tempo acabar, o Assassino precisa capturá-la antes disso. O jogo é jogado em linha de comando e oferece uma experiência intensa de perseguição e estratégia.
 
 ## 🎲 Objetivo do Jogo
 
-O jogador interage com o ambiente através de comandos de texto, examinando objetos e resolvendo enigmas. Ele pode utilizar alavancas, caixas e notas para obter pistas que o ajudarão a avançar. A progressão acontece ao resolver desafios em cada sala, coletar chaves e desbloquear novas áreas. O jogo oferece múltiplos finais, incentivando a exploração e a tentativa de diferentes abordagens para descobrir segredos e combinações.
+A Vítima (Jogador 1): Sobreviver no labirinto até o tempo acabar, evitando o assassino.
+O Assassino (Jogador 2): Encontrar e capturar a vítima antes que o tempo acabe.
+
+O jogo termina quando:
+
+O tempo acaba, e a vítima escapa.
+OU
+O assassino captura a vítima.
+
+O jogo também mantém rankings separados para os melhores jogadores como Vítima e Assassino.
 
 ## 🕹️ Como Jogar
 
-- 
-- 
+- A Vítima usa as teclas W, A, S e D para se mover.
+- O Assassino usa as teclas I, J, K e L para se mover.
 - 
 
 ## ♟️ Executando o Jogo
