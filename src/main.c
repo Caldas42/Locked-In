@@ -37,8 +37,8 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
-
 void atualizarRanking(char *vencedor, char *arquivo);
+
 void loadPlayerRecords(const char *filename, struct rank players[], int *playerCount);
 void sortPlayersByWins(struct rank players[], int playerCount);
 void printPlayerRecords(struct rank players[], int playerCount);
@@ -125,12 +125,12 @@ int main() {
     screenDestroy();
     timerDestroy();
 
-    // Exibir o ranking dos vencedores
-    struct rank players[JOGADORES];
+    
+    struct rank jogadores[JOGADORES];
     int playerCount = 0;
-    loadPlayerRecords("rankingAssassino.txt", players, &playerCount);
-    sortPlayersByWins(players, playerCount);
-    printPlayerRecords(players, playerCount);
+    loadPlayerRecords("rankingAssassino.txt", jogadores, &playerCount);
+    sortPlayersByWins(jogadores, playerCount);
+    printPlayerRecords(jogadores, playerCount);
 
     return 0;
 }
@@ -344,6 +344,7 @@ void loadPlayerRecords(const char *filename, struct rank players[], int *playerC
         printf("Erro ao abrir o arquivo %s.\n", filename);
     }
 }
+
 void sortPlayersByWins(struct rank players[], int playerCount) {
     for (int i = 0; i < playerCount - 1; i++) {
         for (int j = i + 1; j < playerCount; j++) {
@@ -355,6 +356,7 @@ void sortPlayersByWins(struct rank players[], int playerCount) {
         }
     }
 }
+
 void printPlayerRecords(struct rank players[], int playerCount) {
     printf("\n\t\t\tRanking de Vencedores:\n");
     
