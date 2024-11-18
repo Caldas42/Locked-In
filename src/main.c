@@ -21,7 +21,7 @@ int jogador1Y = Y1_INICIAL;
 int jogador2X = X2_INICIAL;
 int jogador2Y = Y2_INICIAL;
 
-#define TEMPO 60000
+#define TEMPO_DE_JOGO 60000
 
 #define JOGADORES 100
 
@@ -33,7 +33,7 @@ struct rank {
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void printarJogadores();
-void limparJogadores();
+void tempoRestante();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
@@ -67,14 +67,11 @@ int main() {
                 screenInit(1);
                 printarLabirinto(labirinto);
                 printarJogadores();
-                timerInit(TEMPO);
+                timerInit(TEMPO_DE_JOGO);
                 
                 while (running) {
-                    int tempoRestante = timerTimeLeft(); // Em milissegundos
-                    screenSetColor(YELLOW, BLACK);
-                    screenGotoxy(1, 1); // Posição fixa no topo esquerdo
-                    printf("Tempo restante: %02d:%02d\n", tempoRestante / 1000 / 60, (tempoRestante / 1000) % 60);
-                    screenUpdate();
+                    tempoRestante();
+
                     if (timerTimeOver()) {
                         screenClear();
                         printf("A Vítma escapou! Tempo esgotado.\n");
@@ -173,7 +170,7 @@ void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINT
 }
 
 void printarJogadores() {
-    screenSetColor(BLUE, DARKGRAY);
+    screenSetColor(BLUE, BLACK);
     screenGotoxy(jogador1X + 1, jogador1Y + 1);
     printf("%c", JOGADOR1);
 
@@ -184,19 +181,20 @@ void printarJogadores() {
     screenUpdate();
 }
 
-void limparJogadores() {
-    screenGotoxy(jogador1X + 1, jogador1Y + 1);
-    printf(" ");
+void tempoRestante() {
+    screenSetColor(YELLOW, BLACK);
+    screenGotoxy(1, 1);
 
-    screenGotoxy(jogador2X + 1, jogador2Y + 1);
-    printf(" ");
-
+    printf("Tempo restante: %02d:%02d\n", timerTimeLeft() / 1000 / 60, (timerTimeLeft() / 1000) % 60);
     screenUpdate();
 }
 
 void movimentarJogador1(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
-    limparJogadores();
     int novoX = jogador1X, novoY = jogador1Y;
+
+    screenGotoxy(jogador1X + 1, jogador1Y + 1);
+    printf(" ");
+    screenUpdate();
 
     switch(tecla) {
         case 'w': 
@@ -234,8 +232,11 @@ void movimentarJogador1(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRI
 }
 
 void movimentarJogador2(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
-    limparJogadores();
     int novoX = jogador2X, novoY = jogador2Y;
+
+    screenGotoxy(jogador2X + 1, jogador2Y + 1);
+    printf(" ");
+    screenUpdate();
 
     switch(tecla) {
         case 'i': 
