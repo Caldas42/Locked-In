@@ -22,6 +22,7 @@ int assassinoX = X2_INICIAL;
 int assassinoY = Y2_INICIAL;
 
 #define TEMPO_DE_JOGO 60000
+#define DELAY 1000
 
 #define JOGADORES 100
 
@@ -37,6 +38,7 @@ void tempoRestante();
 void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
+void delay();
 void atualizarRanking(char *vencedor, char *arquivo);
 void printarRanking(char *arquivo, struct rank jogadores[]);
 
@@ -77,6 +79,7 @@ int main() {
                         printf("A Vítma escapou! Tempo esgotado.\n");
                         printf("Digite seu nome:\n");
 
+                        delay();
                         scanf("%s", vencedor);
                         atualizarRanking(vencedor, "rankingVitimas.txt");
                         
@@ -104,6 +107,7 @@ int main() {
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
                                 
+                                delay();
                                 scanf("%s", vencedor);
                                 atualizarRanking(vencedor, "rankingAssassinos.txt");
 
@@ -275,6 +279,16 @@ void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPR
 
 int assassinato() {
     return vitimaX == assassinoX && vitimaY == assassinoY;
+}
+
+void delay() {
+    timerInit(DELAY);
+
+    while (timerTimeLeft() != 0) {
+        if (timerTimeOver) {
+            break;
+        }
+    }
 }
 
 void atualizarRanking(char *vencedor, char *arquivo) {
