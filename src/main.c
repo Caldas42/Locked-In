@@ -24,8 +24,6 @@ int assassinoY = Y2_INICIAL;
 #define TEMPO_DE_JOGO 60000
 #define DELAY 2000
 
-#define JOGADORES 100
-
 struct rank {
     char nome[50];
     int vitorias;
@@ -38,7 +36,7 @@ void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMP
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void delay();
 void atualizarRanking(char *vencedor, char *arquivo);
-void printarRanking(char *arquivo, struct rank jogadores[]);
+void printarRanking(char *arquivo);
 
 int main() {
     keyboardInit();
@@ -129,13 +127,11 @@ int main() {
     screenDestroy();
     timerDestroy();
 
-    struct rank jogadores[JOGADORES];
-
     printf("\nRanking de Vítimas:\n");
-    printarRanking("rankingVitimas.txt", jogadores);
+    printarRanking("rankingVitimas.txt");
 
     printf("\nRanking de Assassinos:\n");
-    printarRanking("rankingAssassinos.txt", jogadores);
+    printarRanking("rankingAssassinos.txt");
 
     return 0;
 }
@@ -282,10 +278,11 @@ void delay() {
 }
 
 void atualizarRanking(char *vencedor, char *arquivo) {
-    struct rank jogadores[JOGADORES];
-    int cont = 0, encontrado = 0;
+    struct rank *jogadores = NULL;
+    int cont = 0, encontrado = 0, capacidade = 1;
 
     FILE *ranking = fopen(arquivo, "r");
+    jogadores = malloc(capacidade * sizeof(struct rank));
 
     if (ranking == NULL) {
         printf("Erro ao abrir o arquivo %s.\n", arquivo);
@@ -299,8 +296,9 @@ void atualizarRanking(char *vencedor, char *arquivo) {
 
             cont++;
 
-            if (cont >= JOGADORES) {
-                break;
+            if (cont >= capacidade) {
+                capacidade += 1;
+                jogadores = realloc(jogadores, capacidade * sizeof(struct rank));
             }
         }
 
@@ -334,12 +332,16 @@ void atualizarRanking(char *vencedor, char *arquivo) {
             fclose(ranking);
         }
     }
+
+    free(jogadores);
 }
 
-void printarRanking(char *arquivo, struct rank jogadores[]) {
-    int cont = 0;
+void printarRanking(char *arquivo) {
+    struct rank *jogadores = NULL;
+    int cont = 0, capacidade = 1;
 
     FILE *ranking = fopen(arquivo, "r");
+    jogadores = malloc(capacidade * sizeof(struct rank));
     
     if (ranking == NULL) {
         printf("Erro ao abrir o arquivo %s.\n", arquivo);
@@ -348,8 +350,9 @@ void printarRanking(char *arquivo, struct rank jogadores[]) {
         while (fscanf(ranking, "%s %d", jogadores[cont].nome, &jogadores[cont].vitorias) == 2) {
             cont++;
 
-            if (cont >= JOGADORES) {
-                break;
+            if (cont >= capacidade) {
+                capacidade += 1;
+                jogadores = realloc(jogadores, capacidade * sizeof(struct rank));
             }
         }
 
@@ -369,4 +372,6 @@ void printarRanking(char *arquivo, struct rank jogadores[]) {
     for (int i = 0; i < cont; i++) {
         printf("\t\t\t%s: %d vitória(s)\n", jogadores[i].nome, jogadores[i].vitorias);
     }
+
+    free(jogadores);
 }
