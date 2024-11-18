@@ -272,8 +272,7 @@ int assassinato() {
 
 void atualizarRanking(char *vencedor, char *arquivo) {
     struct rank jogadores[JOGADORES];
-    int cont = 0;
-    int encontrado = 0;
+    int cont = 0, encontrado = 0;
 
     FILE *ranking = fopen(arquivo, "r");
 
