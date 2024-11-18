@@ -37,6 +37,7 @@ void limparJogadores();
 void movimentarJogador1(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarJogador2(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 int assassinato();
+void printartimer();
 void atualizarRanking(char *vencedor, char *arquivo);
 void printarRanking(char *arquivo, struct rank jogadores[]);
 
@@ -68,6 +69,7 @@ int main() {
                 printarLabirinto(labirinto);
                 printarJogadores();
                 timerInit(TEMPO);
+                printartimer();
                 
                 while (running) {
                     if (timerTimeOver()) {
@@ -165,6 +167,12 @@ void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINT
 
     screenUpdate();
 }
+
+void printartimer(){
+    screenGotoxy(35,24);
+    timerPrint(TEMPO);
+}
+
 
 void printarJogadores() {
     screenSetColor(BLUE, DARKGRAY);
