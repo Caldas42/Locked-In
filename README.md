@@ -48,7 +48,7 @@ O jogo também mantém rankings separados para os melhores jogadores como Vítim
 
 - A Vítima usa as teclas W, A, S e D para se mover.
 - O Assassino usa as teclas I, J, K e L para se mover.
-- 
+- Aperte ESC para sair do jogo.
 
 ## ♟️ Executando o Jogo
 
