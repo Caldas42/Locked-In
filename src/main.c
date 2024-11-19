@@ -21,8 +21,7 @@ int vitimaY = Y1_INICIAL;
 int assassinoX = X2_INICIAL;
 int assassinoY = Y2_INICIAL;
 
-#define TEMPO_DE_JOGO 60000
-#define DELAY 2000
+#define TEMPO_DE_JOGO 45000
 
 struct rank {
     char nome[50];
@@ -30,13 +29,12 @@ struct rank {
 };
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-void printarJogadores();
+void imprimirLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
+void imprimirJogadores();
 void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-void delay();
 void atualizarRanking(char *vencedor, char *arquivo);
-void printarRanking(char *arquivo);
+void imprimirRanking(char *arquivo);
 
 int main() {
     keyboardInit();
@@ -63,8 +61,8 @@ int main() {
 
             if (key == 32) {
                 screenInit(1);
-                printarLabirinto(labirinto);
-                printarJogadores();
+                imprimirLabirinto(labirinto);
+                imprimirJogadores();
                 timerInit(TEMPO_DE_JOGO);
                 
                 while (running) {
@@ -79,7 +77,9 @@ int main() {
                         printf("A Vítma escapou! Tempo esgotado.\n");
                         printf("Digite seu nome:\n");
 
-                        delay();
+                        int ch;
+                        while ((ch = getchar()) != '\n');
+
                         scanf("%s", vencedor);
                         atualizarRanking(vencedor, "rankingVitimas.txt");
                         
@@ -107,7 +107,9 @@ int main() {
                                 printf("O Assassino venceu!");
                                 printf("Digite seu nome:\n");
                                 
-                                delay();
+                                int ch;
+                                while ((ch = getchar()) != '\n');
+
                                 scanf("%s", vencedor);
                                 atualizarRanking(vencedor, "rankingAssassinos.txt");
 
@@ -128,10 +130,10 @@ int main() {
     timerDestroy();
 
     printf("\nRanking de Vítimas:\n");
-    printarRanking("rankingVitimas.txt");
+    imprimirRanking("rankingVitimas.txt");
 
     printf("\nRanking de Assassinos:\n");
-    printarRanking("rankingAssassinos.txt");
+    imprimirRanking("rankingAssassinos.txt");
 
     return 0;
 }
@@ -158,7 +160,7 @@ void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO 
     }
 }
 
-void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
+void imprimirLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
     screenSetColor(WHITE, BLACK);
 
     for (int i = 0; i < LARGURA_LABIRINTO + 2; i++) {
@@ -171,7 +173,7 @@ void printarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINT
     screenUpdate();
 }
 
-void printarJogadores() {
+void imprimirJogadores() {
     screenSetColor(BLUE, BLACK);
     screenGotoxy(vitimaX + 1, vitimaY + 1);
     printf("%c", VITIMA);
@@ -222,7 +224,7 @@ void movimentarVitima(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIME
         vitimaY = novoY;
     }
 
-    printarJogadores();
+    imprimirJogadores();
 }
 
 void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
@@ -264,17 +266,7 @@ void movimentarAssassino(char tecla, char labirinto[LARGURA_LABIRINTO + 2][COMPR
         assassinoY = novoY;
     }
 
-    printarJogadores();
-}
-
-void delay() {
-    timerInit(DELAY);
-
-    while (timerTimeOver() != TEMPO_DE_JOGO) {
-        if (timerTimeOver) {
-            break;
-        }
-    }
+    imprimirJogadores();
 }
 
 void atualizarRanking(char *vencedor, char *arquivo) {
@@ -336,7 +328,7 @@ void atualizarRanking(char *vencedor, char *arquivo) {
     free(jogadores);
 }
 
-void printarRanking(char *arquivo) {
+void imprimirRanking(char *arquivo) {
     struct rank *jogadores = NULL;
     int cont = 0, capacidade = 1;
 
