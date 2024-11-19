@@ -21,7 +21,7 @@ int vitimaY = Y1_INICIAL;
 int assassinoX = X2_INICIAL;
 int assassinoY = Y2_INICIAL;
 
-#define TEMPO_DE_JOGO 45000
+#define TEMPO_DE_JOGO 30000
 
 struct rank {
     char nome[50];
