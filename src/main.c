@@ -29,7 +29,6 @@ struct rank {
 };
 
 void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
-void imprimirLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void imprimirJogadores();
 void movimentarVitima(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
 void movimentarAssassino(char direction, char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]);
@@ -41,9 +40,6 @@ int main() {
 
     int menu = 1, running = 1;
     char key, labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2], vencedor[50];
-
-    srand(time(NULL));
-    gerarLabirinto(labirinto);
 
     FILE *ranking;
 
@@ -60,8 +56,9 @@ int main() {
             key = readch();
 
             if (key == 32) {
+                srand(time(NULL));
                 screenInit(1);
-                imprimirLabirinto(labirinto);
+                gerarLabirinto(labirinto);
                 imprimirJogadores();
                 timerInit(TEMPO_DE_JOGO);
                 
@@ -158,9 +155,7 @@ void gerarLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO 
             }
         }
     }
-}
 
-void imprimirLabirinto(char labirinto[LARGURA_LABIRINTO + 2][COMPRIMENTO_LABIRINTO + 2]) {
     screenSetColor(WHITE, BLACK);
 
     for (int i = 0; i < LARGURA_LABIRINTO + 2; i++) {
