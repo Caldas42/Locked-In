@@ -4,7 +4,7 @@
     alt="Repository Size"
   />
   <img
-    src="https://img.shields.io/github/languages/count/Caldas42/Locked-In?style=flat&logo=python"
+    src="https://img.shields.io/github/languages/count/Caldas42/Locked-In?style=flat&logo=c"
     alt="Language Count"
   />
   <img
