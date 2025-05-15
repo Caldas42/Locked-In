@@ -1,12 +1,5 @@
 <p align="center">
   <img
-    src="https://img.shields.io/badge/Status-Em%20desenvolvimento-green?style=flat-square"
-    alt="Status"
-  />
-</p>
-
-<p align="center">
-  <img
     src="https://img.shields.io/github/repo-size/Caldas42/Locked-In?style=flat"
     alt="Repository Size"
   />
